@@ -1,0 +1,29 @@
+@model IEnumerable<NRLApp.Models.ObstacleData>
+@{ ViewData["Title"] = "Registrerte hindere"; }
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Ingen registreringer ennå.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead><tr><th>Navn</th><th>Høyde (m)</th><th>Beskrivelse</th><th>Lat</th><th>Lng</th></tr></thead>
+            <tbody>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td>@o.ObstacleName</td>
+                    <td>@o.ObstacleHeight</td>
+                    <td>@o.ObstacleDescription</td>
+                    <td>@o.Latitude</td>
+                    <td>@o.Longitude</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,22 @@
+# This is a generated file. Not intended for manual editing.
+version: "3.9"
+services:
+  web:
+    build:
+      context: "/Users/joachimbenning/RiderProjects/NRLApp"
+      dockerfile: "./Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net9.0/NRLApp.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net9.0/NRLApp.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "nrlapp:dev"
+    ports: []
+    volumes:
+    - "/Users/joachimbenning/RiderProjects/NRLApp:/app:rw"
+    - "/Users/joachimbenning/RiderProjects/NRLApp:/src:rw"
+    - "/Users/joachimbenning/.nuget/packages:/root/.nuget/packages"
+    working_dir: "/app"

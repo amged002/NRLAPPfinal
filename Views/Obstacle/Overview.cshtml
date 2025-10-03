@@ -1,0 +1,26 @@
+@model NRLApp.Models.ObstacleData
+@{ ViewData["Title"] = "Rapport sendt inn"; }
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+<div class="row gy-2">
+    <div class="col-12"><strong>Navn:</strong> @Model.ObstacleName</div>
+    <div class="col-12"><strong>Høyde:</strong> @Model.ObstacleHeight m</div>
+    <div class="col-12"><strong>Beskrivelse:</strong> @Model.ObstacleDescription</div>
+    <div class="col-12"><strong>Posisjon:</strong> @Model.Latitude, @Model.Longitude</div>
+</div>
+<hr/>
+<div id="mapResult" style="height:300px;border-radius:8px;"></div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const lat = @Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+  const lng = @Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+  const map = L.map('mapResult').setView([lat, lng], 12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+  L.marker([lat, lng]).addTo(map);
+</script>
+
+<div class="mt-3">
+    <a asp-controller="Obstacle" asp-action="DataForm" class="btn btn-secondary">Registrer nytt</a>
+    <a asp-controller="Obstacle" asp-action="List" class="btn btn-outline-primary ms-2">Se alle</a>
+</div>
