@@ -1,14 +1,17 @@
+@*liste over registrerte hindre*@
 @model IEnumerable<NRLApp.Models.ObstacleData>
 @{ ViewData["Title"] = "Registrerte hindere"; }
 
 <h2 class="mb-3">@ViewData["Title"]</h2>
 
+@*håndtering av tomt resultat, ingen registrering*@
 @if (!Model.Any())
 {
     <div class="alert alert-info">Ingen registreringer ennå.</div>
 }
 else
 {
+    @*tabell med alle registeringer*@
     <div class="table-responsive">
         <table class="table table-striped align-middle">
             <thead><tr><th>Navn</th><th>Høyde (m)</th><th>Beskrivelse</th><th>Lat</th><th>Lng</th></tr></thead>
