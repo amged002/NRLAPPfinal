@@ -47,7 +47,42 @@ Desimaler: Høyde med desimal (10,5 eller 10.5) aksepteres — appen er satt til
 
 Bootstrap brukes for enkel og responsiv layout sammen med KI (ChatGPT) 
  
+ ## Appsettings.json
 
+ Appsettings.json brukes til å konfigurere applikasjonen i ASP.NET Core.
 
+ ###
+ Denne delen definerer tilkoblingen til MariaDB-databasen.
 
+ **Server** Navn til database-serveren, som i dette tilfellet er satt til "mariadb". 
+ **Port** Standarden for MariaDB er 3306.
+ **Database** Navnet på databasen som applikasjonen skal bruke, satt til "nrlappdb"
+ **User ID** Brukernavnet for å koble til databasen, satt til "nrlappuser".
+ **Password** Passordet for brukeren, satt til "nrlapp321".
+ **SslMode** Angir om SSL brukes, satt til "None" fordi den ikke brukes.
+
+ ### Logging
+ Definerer hvor detaljerte loggene skal være under kjøring av applikasjonen.
+
+ **Default** Styrer standard loggnivå til "Information". Dette gjør at advarsler og feil vil bli logget.
+ **Microsoft.AspNetCore** Angir loggnivå for ASP.NET core.
+
+ ### AllowedHosts
+ Angir hvilke verter som er tillatt å få tilgang til applikasjonen. "*" betyr at alle verter er tillatt.
+ Bør begrenses for bedre sikkerhet i produksjon.
+
+ ## Appsettings.Development.json
+
+ Appsettings.Development.json brukes til å overstyre innstillinger i Appsettings.json.
+
+ ### ConnectionStrings
+
+ Denne seksjonen definerer hvordan applikasjonen kobler til databasen under lokal utvikling.
+
+ **Server** Satt til "localhost" for lokal utvikling.
+ **Port** Porten databasen bruker, satt til 3307 for å unngå konflikt med standardporten.
+ **Database** Navnet på databasen.
+ **User ID** Brukernavnet for å koble til databasen, satt til root.
+ **Password** Passordet for root-brukeren, satt til "nrlapp321".
+ **SslMode** Angir at SSL ikke brukes, satt til "None".
 
