@@ -5,6 +5,9 @@ namespace NRLApp.Controllers
 {
     public class CurrencyController : Controller
     {
+        // Fast vekslingskurs: 11.50 NOK per EUR
+        private const decimal ExchangeRateEurToNok = 11.50m;
+
         // Viser valutakonverteringsskjemaet
         [HttpGet]
         public IActionResult Convert() => View(new CurrencyData());
@@ -16,10 +19,9 @@ namespace NRLApp.Controllers
         {
             if (!ModelState.IsValid) return View(data);
 
-            // Fast vekslingskurs for 26. august 2025: 11.50 NOK per EUR
-            // Dette er en forenklet implementasjon med statisk kurs
+            // Bruker fast vekslingskurs for konvertering
             // I en produksjonsapp ville man hente kurs fra en API
-            data.ExchangeRate = 11.50;
+            data.ExchangeRate = ExchangeRateEurToNok;
             
             // Beregn NOK beløp
             data.NokAmount = data.EuroAmount * data.ExchangeRate;
