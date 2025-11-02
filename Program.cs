@@ -1,55 +1,69 @@
-using System.Globalization;
+ï»¿using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Her setter vi opp prosjektet vårt til å bruke MVC(controllere og views)
-builder.Services.AddControllersWithViews();
+// === PORT-OPPSETT SOM FUNKER BÃ…DE LOKALT OG I DOCKER ===
+// Inne i Docker settes ASPNETCORE_URLS i docker-compose (http://+:8080).
+// Lokalt (VS/CLI) lÃ¥ser vi til http://localhost:5099 hvis ikke noe annet er satt.
+var runningInContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+if (!runningInContainer && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+{
+    builder.WebHost.ConfigureKestrel(o => o.ListenLocalhost(5099)); // lokal port
+}
 
-// Vi bestemmer at applikasjonen skal bruke engelsk som standard språk
+// === LOGGING (enkel, tydelig i konsoll) ===
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole(o =>
+{
+    o.SingleLine = true;
+    o.TimestampFormat = "HH:mm:ss ";
+});
+
+// MVC + Session (wizard-state)
+builder.Services.AddControllersWithViews();
+builder.Services.AddSession(o => o.IdleTimeout = TimeSpan.FromHours(4));
+
+// (valgfritt) sprÃ¥k
 var defaultCulture = new CultureInfo("en-US");
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    // Hvis ingen språk er valgt, så brukes engelsk
     options.DefaultRequestCulture = new RequestCulture(defaultCulture);
-
-    // Vi sier at kun engelsk støttes i denne applikasjonen 
     options.SupportedCultures = new[] { defaultCulture };
     options.SupportedUICultures = new[] { defaultCulture };
 });
-
-// Vi forteller .NET at "all kultur" (språk,datoformat osv.) skal være engelsk 
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
-
 var app = builder.Build();
 
-// Dette kjøres bare hvis vi ikke er i utviklingsmodus ("i produksjon")
 if (!app.Environment.IsDevelopment())
 {
-    //Viser en feilmelding-side hvis krasjer
     app.UseExceptionHandler("/Home/Error");
-
-    // Sier til nettleseren at den alltid skal bruke HTTPS (sikker tilkobling)
     app.UseHsts();
 }
 
-
-// Aktiverer språkinnstillingene vi satte opp tidligere
 app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
-// Setter opp standard "mellomlag" som brukes i nesten alle webapper 
-app.UseStaticFiles(); // For å kunne bruke CSS, JavaScript, bilder osv.
-app.UseRouting(); // Forteller appen hvordan den skal finne riktig side 
-app.UseAuthorization(); // Brukes hvis vi skal ha innlogging/autorisasjon 
+app.UseStaticFiles();
+app.UseRouting();
+app.UseSession();
+app.UseAuthorization();
 
-// Vi bestemmer hva som er "hovedsiden" til appen 
+// Startside â†’ Area
+app.MapGet("/", () => Results.Redirect("/obstacle/area"));
+
+// Standardrute til ObstacleController
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Obstacle}/{action=DataForm}/{id?}");
-// Hvis du går inn på nettsiden uten å skrive noe spesielt, så sendes du til ObstacleController og DataForm-metoden.
-// "Id" kan legges til i adressen, men er valgfritt. 
+    name: "obstacles",
+    pattern: "obstacle/{action=Area}/{id?}",
+    defaults: new { controller = "Obstacle" });
 
-// Til slutt starter vi applikasjonen
+// Info i konsollen nÃ¥r appen lytter (nyttig i demo)
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var urls = app.Urls.Any() ? string.Join(", ", app.Urls) : "http://localhost:5099";
+    Console.WriteLine($"âœ… Appen kjÃ¸rer. Ã…pne: {urls}/obstacle/area");
+});
+
 app.Run();

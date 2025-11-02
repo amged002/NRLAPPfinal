@@ -1,32 +1,47 @@
-@*liste over registrerte hindre*@
-@model IEnumerable<NRLApp.Models.ObstacleData>
-@{ ViewData["Title"] = "Registrerte hindere"; }
-
-<h2 class="mb-3">@ViewData["Title"]</h2>
-
-@*håndtering av tomt resultat, ingen registrering*@
-@if (!Model.Any())
-{
-    <div class="alert alert-info">Ingen registreringer ennå.</div>
+@model IEnumerable<NRLApp.Models.ObstacleListItem>
+@{
+    ViewData["Title"] = "Registrerte hindre";
 }
-else
-{
-    @*tabell med alle registeringer*@
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead><tr><th>Navn</th><th>Høyde (m)</th><th>Beskrivelse</th><th>Lat</th><th>Lng</th></tr></thead>
-            <tbody>
-            @foreach (var o in Model)
-            {
+
+<div class="screen">
+    <h2>REGISTRERTE HINDRE</h2>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">Ingen innsendelser ennå.</p>
+    }
+    else
+    {
+        <table class="table table-striped table-sm align-middle">
+            <thead>
                 <tr>
-                    <td>@o.ObstacleName</td>
-                    <td>@o.ObstacleHeight</td>
-                    <td>@o.ObstacleDescription</td>
-                    <td>@o.Latitude</td>
-                    <td>@o.Longitude</td>
+                    <th>#</th>
+                    <th>Tid (UTC)</th>
+                    <th>Type</th>
+                    <th>Høyde</th>
+                    <th>Radius</th>
+                    <th>Lat</th>
+                    <th>Lng</th>
                 </tr>
-            }
+            </thead>
+            <tbody>
+                @foreach (var x in Model)
+                {
+                    <tr>
+                        <td>@x.Id</td>
+                        <td>@x.CreatedUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@x.Type</td>
+                        <td>@(x.HeightMaxMeters is null ? $"{x.HeightMinMeters} m+" : $"{x.HeightMinMeters}–{x.HeightMaxMeters} m")</td>
+                        <td>@x.RadiusMeters m</td>
+                        <td>@x.CenterLat</td>
+                        <td>@x.CenterLng</td>
+                    </tr>
+                }
             </tbody>
         </table>
+    }
+
+    <div style="margin-top:12px;">
+        <a class="btn btn-outline-secondary" href="@Url.Action("Area", "Obstacle")">Registrer nytt</a>
     </div>
-}
+</div>

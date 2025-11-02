@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Takk";
+    var ok = TempData["Flash"] as string;
+    var err = TempData["FlashError"] as string;
+}
+<div class="screen">
+    <h2>TAKK FOR AT DU REGISTRERTE ET HINDER</h2>
+
+    @if (!string.IsNullOrEmpty(ok))
+    {
+        <div class="alert alert-success" role="alert">@ok</div>
+    }
+    @if (!string.IsNullOrEmpty(err))
+    {
+        <div class="alert alert-danger" role="alert">@err</div>
+    }
+
+    <p>Du kan registrere et nytt hinder eller se oversikten.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a class="btn-next" href="@Url.Action("Area", "Obstacle")">Registrer nytt</a>
+        <a class="btn-next" style="background:#1e88e5" href="@Url.Action("List", "Obstacle")">Se registrerte</a>
+    </div>
+</div>

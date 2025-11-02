@@ -1,18 +1,23 @@
-﻿# tid
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-WORKDIR /app
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
-
-# bygg
+﻿# ---------- BUILD-STEG ----------
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY . .
-RUN dotnet restore "NRLApp.csproj"
-RUN dotnet publish "NRLApp.csproj" -c Release -o /app/publish
 
-# finalen
-FROM base AS final
+# Kopier alt til containeren
+COPY . .
+
+# Gjenopprett avhengigheter og bygg
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish
+
+# ---------- RUN-STEG ----------
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
+
+# Kopier publiserte filer fra build-steget
 COPY --from=build /app/publish .
+
+# Eksponer port 8080 (den Docker vil bruke)
+EXPOSE 8080
+
+# Start appen
 ENTRYPOINT ["dotnet", "NRLApp.dll"]

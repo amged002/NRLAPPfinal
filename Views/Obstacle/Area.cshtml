@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Registrer område";
+}
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="screen">
+    <h2>REGISTRER OMRÅDE</h2>
+
+    <form asp-action="Area" method="post">
+        @Html.AntiForgeryToken()
+
+        <!-- Kart -->
+        <div class="map-frame">
+            <div id="map" style="width:100%;height:100%"></div>
+        </div>
+
+        <!-- Radius-slider (5–100 m) -->
+        <div style="max-width: 500px; margin: 0 auto 10px;">
+            <label class="form-label">Radius (meter): <strong><span id="radiusLabel">30</span> m</strong></label>
+            <input id="radiusInput" type="range" min="5" max="100" step="1" value="30" class="form-range" />
+        </div>
+
+        <!-- Skjulte felt som sendes til controlleren -->
+        <input type="hidden" name="CenterLat" id="centerLat" />
+        <input type="hidden" name="CenterLng" id="centerLng" />
+        <input type="hidden" name="RadiusMeters" id="radiusMeters" value="30" />
+
+        <button type="submit" class="btn-next">GÅ VIDERE</button>
+    </form>
+</div>
+
+<script>
+    // Start nær Kristiansand sentrum
+    const start = [58.1467, 7.9956];
+    const map = L.map('map').setView(start, 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    // Blå radius-sirkel (ingen markør)
+    let radiusMeters = 30;
+    let center = start;
+    const circle = L.circle(center, {
+        radius: radiusMeters,
+        color: '#1e88e5',      // blå kant
+        weight: 2,
+        fillColor: '#1e88e5',  // blå fyll
+        fillOpacity: 0.20
+    }).addTo(map);
+
+    // Inputs/label
+    const latEl = document.getElementById('centerLat');
+    const lngEl = document.getElementById('centerLng');
+    const radiusEl = document.getElementById('radiusMeters');
+    const slider = document.getElementById('radiusInput');
+    const label = document.getElementById('radiusLabel');
+
+    function syncHidden() {
+        latEl.value = center[0].toFixed(6);
+        lngEl.value = center[1].toFixed(6);
+        radiusEl.value = radiusMeters;
+        label.textContent = radiusMeters;
+    }
+    syncHidden();
+
+    // Klikk i kart: flytt sirkelen
+    map.on('click', e => {
+        center = [e.latlng.lat, e.latlng.lng];
+        circle.setLatLng(e.latlng);
+        syncHidden();
+    });
+
+    // Slider: juster radius live
+    slider.addEventListener('input', e => {
+        const v = parseInt(e.target.value, 10);
+        if (!Number.isNaN(v)) {
+            radiusMeters = v;
+            circle.setRadius(radiusMeters);
+            label.textContent = radiusMeters;
+            radiusEl.value = radiusMeters;
+        }
+    });
+</script>
