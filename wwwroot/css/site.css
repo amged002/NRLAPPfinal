@@ -1,19 +1,21 @@
 /* =========================
-   NLA (Luftambulanse)-tema
+   NLA (Luftambulanse) – tema
    ========================= */
+
+/* Palett */
 :root {
-    --nla-blue: #003E7E; /* primær */
+    --nla-blue: #003E7E; /* primær blå */
     --nla-blue-600: #00346A; /* hover/dark */
     --nla-red: #D7261E; /* aksent/varsler */
     --nla-red-600: #B11F19; /* hover/dark */
-    --surface: #FFFFFF; /* kort/innhold */
     --bg: #F4F6FA; /* lys bakgrunn */
+    --surface: #FFFFFF; /* kort/innhold */
     --text: #1E1E1E; /* primær tekst */
     --muted: #6B7280; /* sekundær tekst */
     --ring: #0EA5E9; /* fokusring */
 }
 
-/* Basestil */
+/* ===== Basestil ===== */
 html, body {
     background: var(--bg);
     color: var(--text);
@@ -28,7 +30,7 @@ a {
         text-decoration: underline;
     }
 
-/* Fokus (UU) – tydelig fokusramme for tastaturbrukere */
+/* Fokus (UU) – god kontrast for tastaturbrukere */
 :focus {
     outline: 2px solid var(--ring) !important;
     outline-offset: 2px !important;
@@ -39,10 +41,12 @@ a {
     box-shadow: 0 0 0 .2rem rgba(0,62,126,.15);
 }
 
-/* Navbar / topp */
-.navbar-light {
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
+/* ===== Navbar/topp ===== */
+.navbar {
+    background: #fff !important;
+    border-bottom: 1px solid #eaeaea !important;
+    box-shadow: 0 1px 5px rgba(0,0,0,.05);
+    min-height: 60px;
 }
 
 .navbar-brand {
@@ -50,9 +54,31 @@ a {
     color: var(--nla-blue) !important;
 }
 
-/* Kort (login/registrering) */
-.login-card,
-.register-card {
+.brand-logo {
+    height: 38px;
+    width: auto;
+    vertical-align: middle;
+    transition: transform .2s ease;
+}
+
+    .brand-logo:hover {
+        transform: scale(1.03);
+    }
+
+/* ===== Kort (login/registrering) ===== */
+.login-shell {
+    min-height: 60vh;
+    padding-top: .5rem;
+}
+
+@media (min-width:992px) {
+    .login-shell {
+        min-height: 55vh;
+        padding-top: .25rem;
+    }
+}
+
+.login-card, .register-card {
     background: var(--surface);
     border-radius: 12px;
     border: 1px solid #E5E7EB;
@@ -62,38 +88,18 @@ a {
     margin: 3rem auto 2rem;
 }
 
-@media (max-width: 576px) {
+    .login-card h1, .register-card h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+@media (max-width:576px) {
     .login-card, .register-card {
         margin: 2rem 1rem;
     }
 }
 
-/* Knapper – blå primær + rød aksent */
-.btn.login-primary,
-.btn.nla-primary {
-    background: var(--nla-blue);
-    border-color: var(--nla-blue);
-    color: #fff;
-}
-
-    .btn.login-primary:hover,
-    .btn.nla-primary:hover {
-        background: var(--nla-blue-600);
-        border-color: var(--nla-blue-600);
-    }
-
-.btn.nla-accent {
-    background: var(--nla-red);
-    border-color: var(--nla-red);
-    color: #fff;
-}
-
-    .btn.nla-accent:hover {
-        background: var(--nla-red-600);
-        border-color: var(--nla-red-600);
-    }
-
-/* Skjemeelementer – større flater, god luft */
+/* Skjemefelt – store trykkflater */
 .form-label {
     font-weight: 600;
 }
@@ -104,7 +110,52 @@ a {
     border-radius: .6rem;
 }
 
-/* Alerts */
+/* ===== Knapper ===== */
+/* Anbefalt: bruk .btn.nla-primary og .btn.nla-accent */
+.btn.nla-primary {
+    background: var(--nla-blue);
+    border-color: var(--nla-blue);
+    color: #fff;
+    font-weight: 700;
+}
+
+    .btn.nla-primary:hover {
+        background: var(--nla-blue-600);
+        border-color: var(--nla-blue-600);
+    }
+
+.btn.nla-accent {
+    background: var(--nla-red);
+    border-color: var(--nla-red);
+    color: #fff;
+    font-weight: 700;
+}
+
+    .btn.nla-accent:hover {
+        background: var(--nla-red-600);
+        border-color: var(--nla-red-600);
+    }
+
+/* FALLBACK: dersom du fortsatt bruker “btn-success login-primary”, tving til blått */
+.btn-success,
+.btn-success:hover,
+.btn-success:focus,
+.btn-success.login-primary,
+.btn-success.login-primary:hover,
+.btn-success.login-primary:focus {
+    background-color: var(--nla-blue) !important;
+    border-color: var(--nla-blue) !important;
+    color: #fff !important;
+    box-shadow: none;
+}
+
+    .btn-success:hover,
+    .btn-success.login-primary:hover {
+        background-color: var(--nla-blue-600) !important;
+        border-color: var(--nla-blue-600) !important;
+    }
+
+/* ===== Alerts ===== */
 .alert-success {
     background: #E8F6FF;
     border: 1px solid #CDEBFF;
@@ -112,483 +163,49 @@ a {
     border-radius: .6rem;
 }
 
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
-}
-
-/* --- Fargepalett (enkelt å endre) --- */
-:root {
-    --bg: #f1f1f1;
-    --card: #ffffff;
-    --primary: #E53935; /* rød knapp */
-    --primary-dark: #8E5858;
-    --text: #222;
-}
-
-/* --- Grunnstil --- */
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3 {
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-a {
-    color: var(--primary);
-    text-decoration: none;
-}
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-/* --- Kort layout for wizard-sider --- */
-.wizard {
-    margin: 1.5rem auto 2.5rem;
-    padding: 1.5rem;
-    background: var(--card);
-    border-radius: 14px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    max-width: 420px;
-}
-
-/* --- Kartområde --- */
-.map-box {
-    height: 420px;
-    width: 100%;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    overflow: hidden;
-    margin-bottom: 1rem;
-}
-
-/* --- Grid for hinder-type og høydevalg --- */
-.choice-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(140px, 1fr));
-    gap: 14px;
-    width: 100%;
-    justify-content: center;
-}
-
-    .choice-grid .btn-choice {
-        background: var(--primary);
-        color: #fff;
-        border: none;
-        border-radius: 12px;
-        font-size: 1.05rem;
-        font-weight: 600;
-        padding: 16px 10px;
-        cursor: pointer;
-        transition: 0.2s ease;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    }
-
-        .choice-grid .btn-choice:hover {
-            background: var(--primary-dark);
-        }
-
-/* --- Store handlingsknapper --- */
-.btn-primary-big {
-    background: var(--primary-dark);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 14px 20px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    width: 100%;
-    max-width: 340px;
-    cursor: pointer;
-    margin-top: 1rem;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-}
-
-    .btn-primary-big:hover {
-        background: var(--primary);
-    }
-
-/* --- For labels og inputs i Area --- */
-.radius-label {
-    font-weight: 600;
-    text-align: center;
-    margin-top: 4px;
-}
-
-/* --- Responsivt design --- */
-@media (min-width: 768px) {
-    .wizard {
-        max-width: 580px;
-        padding: 2rem;
-    }
-
-    .map-box {
-        height: 520px;
-    }
-
-    .choice-grid {
-        grid-template-columns: repeat(3, minmax(160px, 1fr));
-        gap: 18px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .wizard {
-        max-width: 720px;
-        padding: 2.5rem;
-    }
-
-    .map-box {
-        height: 600px;
-    }
-
-    .choice-grid {
-        grid-template-columns: repeat(3, minmax(180px, 1fr));
-        gap: 22px;
-    }
-
-    .btn-choice {
-        font-size: 1.1rem;
-        min-height: 90px;
-    }
-
-    .btn-primary-big {
-        max-width: 420px;
-        font-size: 1.2rem;
-        padding: 16px 24px;
-    }
-}
-
-/* === PC-VENNLIG LAYOUT === */
-body {
-    background: #e5e5e5;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-/* Wrapper for hvert steg (Area, Type, Height osv.) */
-.screen {
-    background: #ddd;
-    border-radius: 12px;
-    padding: 40px 60px;
-    max-width: 900px; /* <-- gjør kortet bredt nok på PC */
-    margin: 60px auto;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    text-align: center;
-}
-
-    .screen h2 {
-        font-weight: 800;
-        font-size: 2rem;
-        margin-bottom: 24px;
-    }
-
-/* Kartet skal være STORT på PC */
-.map-frame {
-    width: 100%;
-    height: 600px; /* <-- større kart */
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid #cfcfcf;
-    margin-bottom: 20px;
-}
-
-/* GÅ VIDERE-knapp */
-.btn-next {
-    background: #8E5858;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 14px 20px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    width: 220px;
-    margin-top: 16px;
-}
-
-    .btn-next:hover {
-        background: #E53935;
-    }
-
-/* GRID for Type og Height */
-.grid-tiles {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 700px;
-    margin: 0 auto 20px;
-}
-
-.tile {
-    background: #E53935;
-    color: white;
-    font-weight: 800;
-    border: none;
-    border-radius: 10px;
-    height: 120px;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    cursor: pointer;
-}
-
-    .tile:hover {
-        background: #b71c1c;
-    }
-
-/* Litt responsivitet – så det fortsatt ser OK ut på mindre skjermer */
-@media (max-width: 800px) {
-    .screen {
-        max-width: 95%;
-        padding: 24px;
-    }
-
-    .map-frame {
-        height: 360px;
-    }
-
-    .grid-tiles {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-/* ===========================================
-   LOGIN / REGISTER SIDE – PILOTVERSJON
-   =========================================== */
-
-body {
-    background-color: #f4f4f4; /* myk grå bakgrunn */
-}
-
-/* Kortet */
-.login-card {
-    border-radius: 1rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-    /* Overskrift */
-    .login-card h1 {
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
-
-/* Felt */
-.form-control-lg {
-    height: 55px; /* store trykkflater */
-    font-size: 1.1rem;
-}
-
-/* Grønn knapp – tydelig og høy kontrast */
-.btn-success.login-primary {
-    height: 60px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    background-color: #0b9444;
-    border-color: #0b9444;
-    transition: background-color 0.2s ease;
-}
-
-    .btn-success.login-primary:hover,
-    .btn-success.login-primary:focus {
-        background-color: #09763a;
-        border-color: #09763a;
-    }
-
-/* Fokusramme (tilgjengelighet) */
-button:focus,
-.form-control:focus,
-a:focus {
-    outline: 3px solid rgba(13, 110, 253, 0.5);
-    outline-offset: 2px;
-}
-
-/* Mindre skjermer */
-@media (max-width: 576px) {
-    .login-card {
-        margin-top: 2rem;
-        padding: 0.5rem;
-    }
-
-    .btn-success.login-primary {
-        height: 56px;
-        font-size: 1.1rem;
-    }
-}
-/* Løft login-kortet litt opp og behold god luft */
-.login-shell {
-    min-height: 60vh;
-    padding-top: 0.5rem;
-}
-
-@media (min-width: 992px) {
-    .login-shell {
-        min-height: 55vh;
-        padding-top: 0.25rem;
-    }
-}
-/* === Ekstra mobil- og iPad-tilpasning === */
-
-/* Øk lesbarhet på små skjermer */
-@media (max-width: 576px) {
+/* ===== Respons / touch ===== */
+@media (max-width:576px) {
     html {
         font-size: 17px;
     }
-}
-
-/* Sikre store trykkflater for input/knapp */
-.form-control-lg {
-    height: 56px;
-}
-
-.btn.login-primary, .btn-success.login-primary {
-    min-height: 56px;
-    font-size: 1.1rem;
-}
-
-/* Gjør knapper alltid full bredde på små skjermer */
-@media (max-width: 768px) {
+    /* litt større tekst på små skjermer */
     .btn {
         width: 100%;
     }
+    /* knapper i full bredde */
+    .login-shell {
+        padding: 0 .75rem;
+    }
 }
 
-/* Ekstra spacing og fokusmarkering (for touch) */
-.login-shell {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-}
-
-:focus-visible {
-    outline: 3px solid rgba(13, 110, 253, .5);
-    outline-offset: 2px;
-}
-/* ===== iPad / nettbrett-tilpasninger ===== */
-
-/* iPad-vennlig typografi og trykkflater (768–1024px bredde) */
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (min-width:768px) and (max-width:1024px) {
     html {
         font-size: 18px;
     }
-    /* litt større tekst */
+    /* iPad typografi */
     .login-card {
         max-width: 520px;
     }
-        /* litt bredere kort enn mobil */
-        .login-card h1 {
-            font-size: 2rem;
-        }
-    /* tydelig tittel */
+
     .form-control-lg {
         height: 60px;
         font-size: 1.125rem;
     }
 
-    .btn.login-primary, .btn-success.login-primary {
+    .btn {
         min-height: 60px;
         font-size: 1.15rem;
     }
 }
-
-/* iPad portrett: litt mer topp-luft for balansert plassering */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-    .login-shell {
-        min-height: 60vh;
-        padding-top: 1rem;
-    }
-}
-
-/* iPad landskap: mindre topp-luft (mer “midt på”) */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-    .login-shell {
-        min-height: 50vh;
-        padding-top: .5rem;
-    }
-}
-
-/* Bruk iOS-safe areas (for notch/kant) – funker kun pga viewport-fit=cover */
+/* iOS safe-areas */
 .login-shell {
-    padding-left: max(0.75rem, env(safe-area-inset-left));
-    padding-right: max(0.75rem, env(safe-area-inset-right));
-    padding-top: max(0.5rem, env(safe-area-inset-top));
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-left: max(.75rem, env(safe-area-inset-left));
+    padding-right: max(.75rem, env(safe-area-inset-right));
+    padding-top: max(.5rem, env(safe-area-inset-top));
+    padding-bottom: max(.5rem, env(safe-area-inset-bottom));
 }
 
-/* Touch-enheter: øk vertikal padding på klikkbare elementer */
-@media (pointer: coarse) {
-    .btn, .nav-link {
-        padding-block: 0.75rem;
-    }
-    /* større treffflate */
-}
-
-/* Sørg for at iOS ikke auto-zoomer inputs (vi ligger allerede ?16px, men sikkerhetsnett) */
-input, select, textarea {
-    font-size: 16px;
-}
-/* === Kartverket toppfelt (navbar) === */
-
-.navbar {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #eaeaea !important;
-    box-shadow: 0 1px 5px rgba(0,0,0,.05);
-    min-height: 60px;
-}
-
-.brand-logo {
-    height: 38px; /* god balanse mot teksten */
-    width: auto;
-    vertical-align: middle;
-    transition: transform 0.2s ease;
-}
-
-    .brand-logo:hover {
-        transform: scale(1.03); /* diskret hover-effekt */
-    }
-
-/* Ryddig containerbredde */
-@media (min-width: 1400px) {
-    .container, .container-fluid {
-        max-width: 1140px;
-    }
-}
-
-/* Diskret footer */
+/* ===== Footer ===== */
 footer.footer {
     border-top: 1px solid #e9ecef;
     color: #6c757d;
@@ -597,12 +214,149 @@ footer.footer {
     padding: .75rem 0;
 }
 
-
-
-
-
-
-.main-content {
-    transform: scale(1.2);
-    transform-origin: top center;
+/* ===== (valgfritt) TEST – kommenter ut etter verifisering ===== */
+/*
+body::after{
+  content:"CSS: Luftambulanse-tema aktivt";
+  position:fixed; right:8px; bottom:8px;
+  background:#D7261E; color:#fff; padding:4px 8px; font-weight:700;
+  z-index:99999; border-radius:6px;
 }
+*/
+/* ===========================================================
+   OBSTACLE / WIZARD-STILER (gjeninnført, tilpasset NLA-tema)
+   =========================================================== */
+
+/* Felles kort/wizard-boks */
+.wizard,
+.screen {
+    margin: 1.5rem auto 2.5rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    max-width: 900px; /* bredere på PC */
+    text-align: center;
+    border: 1px solid #e6e6e6;
+}
+
+    .screen h2, .wizard h2 {
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 24px;
+    }
+
+/* Kart-rammer */
+.map-box,
+.map-frame {
+    width: 100%;
+    height: 520px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #cfcfcf;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 800px) {
+    .map-box, .map-frame {
+        height: 360px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .map-box, .map-frame {
+        height: 600px;
+    }
+}
+
+/* Valg-grid (hindertype, høyde osv.) */
+.choice-grid,
+.grid-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+    gap: 14px;
+    width: 100%;
+    justify-content: center;
+    max-width: 700px;
+    margin: 0 auto 20px;
+}
+
+@media (min-width: 768px) {
+    .choice-grid, .grid-tiles {
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+        gap: 18px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .choice-grid, .grid-tiles {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 22px;
+    }
+}
+
+/* Fliser/valgknapper */
+.choice-grid .btn-choice,
+.tile {
+    background: var(--nla-red);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    min-height: 90px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 16px 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+    .choice-grid .btn-choice:hover,
+    .tile:hover {
+        background: var(--nla-red-600);
+    }
+
+/* Primær “gå videre”/store handlinger */
+.btn-primary-big,
+.btn-next {
+    background: var(--nla-blue);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    width: 100%;
+    max-width: 340px;
+    cursor: pointer;
+    margin-top: 1rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    transition: background .2s ease;
+}
+
+    .btn-primary-big:hover,
+    .btn-next:hover {
+        background: var(--nla-blue-600);
+    }
+
+/* Små hjelpetekster / etiketter */
+.radius-label {
+    font-weight: 600;
+    text-align: center;
+    margin-top: 4px;
+    color: var(--muted);
+}
+
+/* PC-vennlig spacing */
+@media (min-width: 992px) {
+    .screen {
+        padding: 40px 60px;
+    }
+}
+
+/* Sikre at “body”-tema vårt ikke blir overkjørt av gammel legacy */
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
