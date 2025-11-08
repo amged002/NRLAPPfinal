@@ -34,7 +34,6 @@ builder.Services.ConfigureApplicationCookie(opt =>
     opt.SlidingExpiration = true;
 });
 
-
 // === PORT-OPPSETT SOM FUNKER BÅDE LOKALT OG I DOCKER ===
 // Inne i Docker settes ASPNETCORE_URLS i docker-compose (http://+:8080).
 // Lokalt (VS/CLI) låser vi til http://localhost:5099 hvis ikke noe annet er satt.
