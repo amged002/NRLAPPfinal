@@ -15,16 +15,6 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    },
-    "NRLApp": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "http://localhost:5289;https://localhost:7243",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ConnectionStrings__DefaultConnection": "Server=127.0.0.1;Port=3306;Database=nrlapp;User ID=nrl_user;Password=Demo321;SslMode=none;TreatTinyAsBoolean=true;CharSet=utf8mb4"
-      }
     }
   }
 }
