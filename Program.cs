@@ -6,15 +6,28 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using NRLApp.Data;
 
+// Legg til denne:
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
-// DB: MySQL/MariaDB via Pomelo
+
+// === DATABASE (MySQL/MariaDB via Pomelo) ===
+// Leser connection string "DefaultConnection" fra appsettings / miljøvariabler
 var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// VIKTIG: Ikke bruk AutoDetect (krever live-DB); spesifiser MariaDB-versjon uten å koble til.
+var serverVersion = ServerVersion.Create(new Version(11, 0, 0), ServerType.MariaDb);
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseMySql(cs, ServerVersion.AutoDetect(cs));
+    options.UseMySql(cs, serverVersion, mySqlOptions =>
+    {
+        // Litt robusthet på transient feil
+        mySqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
+    });
 });
 
-// Identity (enkle krav i dev – strammes inn senere)
+// === IDENTITY (enkle krav i dev) ===
 builder.Services
     .AddIdentity<IdentityUser, IdentityRole>(opt =>
     {
@@ -35,8 +48,6 @@ builder.Services.ConfigureApplicationCookie(opt =>
 });
 
 // === PORT-OPPSETT SOM FUNKER BÅDE LOKALT OG I DOCKER ===
-// Inne i Docker settes ASPNETCORE_URLS i docker-compose (http://+:8080).
-// Lokalt (VS/CLI) låser vi til http://localhost:5099 hvis ikke noe annet er satt.
 var runningInContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
 if (!runningInContainer && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
 {
@@ -51,7 +62,7 @@ builder.Logging.AddSimpleConsole(o =>
     o.TimestampFormat = "HH:mm:ss ";
 });
 
-// MVC + Session (wizard-state)
+// MVC + Session
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession(o => o.IdleTimeout = TimeSpan.FromHours(4));
 
@@ -78,13 +89,11 @@ app.UseRequestLocalization(app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseSession();
 
 // ⚠️ Viktig rekkefølge
-app.UseAuthentication(); // MÅ komme før UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 // --- Ruter ---
@@ -100,6 +109,72 @@ app.MapControllerRoute(
     pattern: "obstacle/{action=Area}/{id?}",
     defaults: new { controller = "Obstacle" }
 );
+
+// === VENT PÅ DB -> MIGRER -> SEED ADMIN ===
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var db = services.GetRequiredService<ApplicationDbContext>();
+
+    // 1) Vent (med retry) til DB svarer
+    var connected = false;
+    for (int attempt = 1; attempt <= 90; attempt++) // inntil ~90 sek
+    {
+        try
+        {
+            if (await db.Database.CanConnectAsync())
+            {
+                connected = true;
+                logger.LogInformation("DB er tilgjengelig (forsøk {Attempt}).", attempt);
+                break;
+            }
+        }
+        catch
+        {
+            // ignorer, prøv igjen
+        }
+        logger.LogInformation("Venter på DB (forsøk {Attempt}/90)...", attempt);
+        await Task.Delay(1000);
+    }
+
+    if (!connected)
+    {
+        logger.LogError("Fikk ikke kontakt med DB innen tidsfristen. Sjekk compose.yaml og connection string.");
+        throw new Exception("Database not reachable in time.");
+    }
+
+    // 2) Migrer
+    await db.Database.MigrateAsync();
+
+    // 3) Seed admin hvis tomt
+    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    const string adminEmail = "admin@nrl.local";
+    const string adminPass = "Admin!123!";
+    const string adminRole = "Admin";
+
+    if (!await roleManager.RoleExistsAsync(adminRole))
+        await roleManager.CreateAsync(new IdentityRole(adminRole));
+
+    if (!userManager.Users.Any())
+    {
+        var admin = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(admin, adminPass);
+        if (result.Succeeded)
+            await userManager.AddToRoleAsync(admin, adminRole);
+        else
+            logger.LogError("Klarte ikke å opprette admin: {Errors}",
+                string.Join(", ", result.Errors.Select(e => $"{e.Code}:{e.Description}")));
+    }
+}
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
