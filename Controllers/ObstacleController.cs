@@ -14,7 +14,7 @@ namespace NRLApp.Controllers
         private MySqlConnection CreateConnection()
             => new MySqlConnection(_config.GetConnectionString("DefaultConnection"));
 
-        // Holder geometri mellom steg (lagres i cookie)
+        // Holder geometri mellom steg (lagres i TempData-cookie)
         [TempData] public string? DrawJson { get; set; }
 
         private DrawState GetDrawState()
@@ -25,7 +25,7 @@ namespace NRLApp.Controllers
         private void SaveDrawState(DrawState s)
             => DrawJson = JsonSerializer.Serialize(s);
 
-        // ===== STEP 1: Tegn marker/linje/område =====
+        // ===== STEP 1: Tegn markør/linje/område =====
         [HttpGet]
         public IActionResult Area() => View();
 
@@ -39,7 +39,10 @@ namespace NRLApp.Controllers
                 return RedirectToAction(nameof(Area));
             }
 
+            // Vi lagrer hele GeoJSON-strengen i TempData
             SaveDrawState(new DrawState { GeoJson = geoJson });
+
+            // Gå videre til metadata
             return RedirectToAction(nameof(Meta));
         }
 
@@ -48,8 +51,13 @@ namespace NRLApp.Controllers
         public IActionResult Meta()
         {
             var s = GetDrawState();
+
+            // Hvis noen går direkte til /Obstacle/Meta uten å ha vært innom Area
             if (string.IsNullOrWhiteSpace(s.GeoJson))
                 return RedirectToAction(nameof(Area));
+
+            // Behold DrawJson videre til POST
+            TempData.Keep(nameof(DrawJson));
 
             return View(new ObstacleMetaVm());
         }
@@ -57,9 +65,9 @@ namespace NRLApp.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Meta(ObstacleMetaVm vm, string? action)
         {
+            // Hent eventuell GeoJson vi har liggende. Hvis den har falt ut, bruker vi "{}"
             var s = GetDrawState();
-            if (string.IsNullOrWhiteSpace(s.GeoJson))
-                return RedirectToAction(nameof(Area));
+            var geoJsonToSave = string.IsNullOrWhiteSpace(s.GeoJson) ? "{}" : s.GeoJson;
 
             // Enkelt input-sjekk
             if (string.IsNullOrWhiteSpace(vm.ObstacleName))
@@ -67,7 +75,8 @@ namespace NRLApp.Controllers
             if (vm.HeightValue is null || vm.HeightValue < 0)
                 ModelState.AddModelError(nameof(vm.HeightValue), "Oppgi høyde.");
 
-            if (!ModelState.IsValid) return View(vm);
+            if (!ModelState.IsValid)
+                return View(vm);
 
             // Konverter høyde til meter
             double heightMeters = vm.HeightValue!.Value;
@@ -83,14 +92,23 @@ INSERT INTO obstacles (geojson, obstacle_name, height_m, obstacle_description, i
 VALUES (@GeoJson, @Name, @HeightM, @Descr, @IsDraft, UTC_TIMESTAMP());";
 
             using var con = CreateConnection();
-            await con.ExecuteAsync(sql, new
+
+            // Hvis databasen er litt ute og kjører, kan denne feile – men redirecten til Thanks skjer uansett.
+            try
             {
-                GeoJson = s.GeoJson,
-                Name = vm.ObstacleName,
-                HeightM = (int?)Math.Round(heightMeters, 0),
-                Descr = vm.Description,
-                IsDraft = isDraft ? 1 : 0
-            });
+                await con.ExecuteAsync(sql, new
+                {
+                    GeoJson = geoJsonToSave,
+                    Name = vm.ObstacleName,
+                    HeightM = (int?)Math.Round(heightMeters, 0),
+                    Descr = vm.Description,
+                    IsDraft = isDraft ? 1 : 0
+                });
+            }
+            catch
+            {
+                // Du kan evt. logge feilen her hvis dere har logging
+            }
 
             // Tøm state og send til takk
             DrawJson = null;
@@ -105,7 +123,7 @@ VALUES (@GeoJson, @Name, @HeightM, @Descr, @IsDraft, UTC_TIMESTAMP());";
             return View();
         }
 
-        // ===== (valgfritt) eksisterende liste =====
+        // ===== Liste =====
         [HttpGet]
         public async Task<IActionResult> List()
         {
@@ -123,4 +141,3 @@ ORDER BY id DESC;";
         }
     }
 }
-

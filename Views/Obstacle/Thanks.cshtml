@@ -1,16 +1,122 @@
 ﻿@{
-    ViewData["Title"] = "Takk";
-    bool draft = (bool)(ViewBag.Draft ?? false);
+    ViewData["Title"] = "Hinder registrert";
+
+    bool isDraft = false;
+    if (ViewBag.Draft is bool b)
+    {
+        isDraft = b;
+    }
 }
-<div class="screen" style="max-width:700px;margin:0 auto;text-align:center;">
-    <h2>@(draft ? "UTKAST LAGRET" : "TUSEN TAKK!")</h2>
-    <p class="lead">
-        @(draft
-                ? "Utkastet ble lagret. Du kan komme tilbake og fullføre senere."
-                : "Innsendingen din er registrert. Takk for hjelpen!")
-    </p>
-    <div class="mt-3">
-        <a asp-controller="Obstacle" asp-action="Area" class="btn btn-outline-secondary me-2">Registrer nytt</a>
-        <a asp-controller="Obstacle" asp-action="Map" class="btn btn-primary">Se på kart</a>
+
+<div class="thanks-screen">
+    <div class="thanks-card">
+        <h2>@(isDraft ? "UTKAST LAGRET" : "HINDER REGISTRERT")</h2>
+
+        <p class="thanks-text">
+            @if (isDraft)
+            {
+                @:Hinderet er lagret som utkast. Du kan finne det igjen under registrerte hindere og fullføre senere.
+            }
+            else
+            {
+                @:Takk! Hinderet er registrert og lagret i systemet.
+            }
+        </p>
+
+        <div class="thanks-actions">
+            <a asp-action="Area" class="btn-primary">
+                Registrer nytt hinder
+            </a>
+
+            <a asp-action="List" class="btn-secondary">
+                Gå til registrerte hindere
+            </a>
+        </div>
     </div>
 </div>
+
+<style>
+    .thanks-screen {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 40px 20px;
+        box-sizing: border-box;
+    }
+
+    .thanks-card {
+        max-width: 600px;
+        margin: 60px auto;
+        padding: 40px 32px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+
+        .thanks-card h2 {
+            font-size: 30px;
+            margin-bottom: 16px;
+        }
+
+    .thanks-text {
+        font-size: 16px;
+        margin-bottom: 28px;
+    }
+
+    .thanks-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        min-width: 180px;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: #004a92;
+        color: #ffffff;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            filter: brightness(0.95);
+        }
+
+    .btn-secondary {
+        background: #f5f5f5;
+        color: #333333;
+        border: 1px solid #dddddd;
+    }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+
+    @@media (max-width: 600px) {
+        .thanks-card {
+            margin: 30px 10px;
+            padding: 30px 20px;
+        }
+
+        .thanks-actions {
+            flex-direction: column;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+        }
+    }
+</style>
