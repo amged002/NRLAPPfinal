@@ -1,37 +1,28 @@
-﻿services:
+﻿version: "2.4"
+services:
   mariadb:
     image: mariadb:11
     container_name: nrl-mariadb
+    restart: unless-stopped
     environment:
-      - MYSQL_DATABASE=nrl
-      - MYSQL_USER=nrl_user
-      - MYSQL_PASSWORD=Amjed2002
-      - MYSQL_ROOT_PASSWORD=changeMeRoot
+      MYSQL_DATABASE: nrl
+      MYSQL_USER: nrl_user
+      MYSQL_PASSWORD: nrl_pass
+      MYSQL_ROOT_PASSWORD: changeMeRoot
     ports:
-      - "3307:3306"   # valgfritt; kun hvis du vil nå DB fra host-maskinen
+      - "3307:3306"
     volumes:
       - dbdata:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  nrlapp:                # <-- din web/app-tjeneste
+  nrlapp:
     build: .
     depends_on:
-      mariadb:
-        condition: service_healthy
+      - mariadb
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=mariadb;Port=3306;Database=nrl;User ID=nrl_user;Password=Amjed2002;SslMode=none;TreatTinyAsBoolean=true;CharSet=utf8mb4
+      - ConnectionStrings__DefaultConnection=Server=mariadb;Port=3306;Database=nrl;User Id=nrl_user;Password=nrl_pass;SslMode=none;TreatTinyAsBoolean=true;CharSet=utf8mb4
     ports:
       - "8080:8080"
       - "8081:8081"
-    # ev. andre settings (volumes, etc.)
 
 volumes:
   dbdata:
-
-
-
