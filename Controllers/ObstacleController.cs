@@ -52,11 +52,9 @@ namespace NRLApp.Controllers
         {
             var s = GetDrawState();
 
-            // Hvis noen går direkte til /Obstacle/Meta uten å ha vært innom Area
             if (string.IsNullOrWhiteSpace(s.GeoJson))
                 return RedirectToAction(nameof(Area));
 
-            // Behold DrawJson videre til POST
             TempData.Keep(nameof(DrawJson));
 
             return View(new ObstacleMetaVm());
@@ -65,11 +63,9 @@ namespace NRLApp.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Meta(ObstacleMetaVm vm, string? action)
         {
-            // Hent eventuell GeoJson vi har liggende. Hvis den har falt ut, bruker vi "{}"
             var s = GetDrawState();
             var geoJsonToSave = string.IsNullOrWhiteSpace(s.GeoJson) ? "{}" : s.GeoJson;
 
-            // Enkelt input-sjekk
             if (string.IsNullOrWhiteSpace(vm.ObstacleName))
                 ModelState.AddModelError(nameof(vm.ObstacleName), "Skriv hva det er.");
             if (vm.HeightValue is null || vm.HeightValue < 0)
@@ -78,12 +74,10 @@ namespace NRLApp.Controllers
             if (!ModelState.IsValid)
                 return View(vm);
 
-            // Konverter høyde til meter
             double heightMeters = vm.HeightValue!.Value;
+
             if (string.Equals(vm.HeightUnit, "ft", StringComparison.OrdinalIgnoreCase))
-            {
                 heightMeters = Math.Round(heightMeters * 0.3048, 0);
-            }
 
             bool isDraft = string.Equals(action, "draft", StringComparison.OrdinalIgnoreCase) || vm.SaveAsDraft;
 
@@ -93,7 +87,6 @@ VALUES (@GeoJson, @Name, @HeightM, @Descr, @IsDraft, UTC_TIMESTAMP());";
 
             using var con = CreateConnection();
 
-            // Hvis databasen er litt ute og kjører, kan denne feile – men redirecten til Thanks skjer uansett.
             try
             {
                 await con.ExecuteAsync(sql, new
@@ -107,10 +100,9 @@ VALUES (@GeoJson, @Name, @HeightM, @Descr, @IsDraft, UTC_TIMESTAMP());";
             }
             catch
             {
-                // Du kan evt. logge feilen her hvis dere har logging
+                // Logger kan legges her hvis ønskelig
             }
 
-            // Tøm state og send til takk
             DrawJson = null;
             return RedirectToAction(nameof(Thanks), new { draft = isDraft });
         }
@@ -136,9 +128,36 @@ SELECT id,
        created_utc      AS CreatedUtc
 FROM obstacles
 ORDER BY id DESC;";
-            // Be Dapper mappe direkte til ObstacleListItem så modellen stemmer med viewet
+
             var rows = await con.QueryAsync<ObstacleListItem>(sql);
             return View(rows);
         }
-    }
+
+        // ==================================================================
+        //    Vis enkelt hinder (for "Vis"-knappen i registrerte hindere)
+        // ==================================================================
+        [HttpGet]
+        public async Task<IActionResult> Vis(int id)
+        {
+            using var con = CreateConnection();
+
+            const string sql = @"
+SELECT id,
+       obstacle_name        AS ObstacleName,
+       height_m             AS HeightMeters,
+       obstacle_description AS Description,
+       geojson              AS GeoJson,
+       is_draft             AS IsDraft,
+       created_utc          AS CreatedUtc
+FROM obstacles
+WHERE id = @Id;";
+
+            var obstacle = await con.QuerySingleOrDefaultAsync<ObstacleDetailsVm>(sql, new { Id = id });
+
+            if (obstacle == null)
+                return NotFound();
+
+            return View(obstacle);
+        }
+    }   
 }

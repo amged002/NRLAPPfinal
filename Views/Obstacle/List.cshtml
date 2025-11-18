@@ -13,6 +13,7 @@
             <th>Høyde (m)</th>
             <th>Status</th>
             <th>Registrert</th>
+            <th>Vis</th>
         </tr>
     </thead>
     <tbody>
@@ -33,6 +34,16 @@
                     }
                 </td>
                 <td>@x.CreatedUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+
+                <!-- 🔹 Her er "Vis"-kolonnen -->
+                <td>
+                    <a asp-controller="Obstacle"
+                       asp-action="Vis"
+                       asp-route-id="@x.Id"
+                       class="btn btn-sm btn-primary">
+                        Vis
+                    </a>
+                </td>
             </tr>
         }
     </tbody>
