@@ -16,7 +16,8 @@
 }
 
 /* ===== Basestil ===== */
-html, body {
+html,
+body {
     background: var(--bg);
     color: var(--text);
 }
@@ -38,14 +39,14 @@ a {
 
 .form-control:focus {
     border-color: var(--nla-blue);
-    box-shadow: 0 0 0 .2rem rgba(0,62,126,.15);
+    box-shadow: 0 0 0 .2rem rgba(0, 62, 126, .15);
 }
 
 /* ===== Navbar/topp ===== */
 .navbar {
     background: #fff !important;
     border-bottom: 1px solid #eaeaea !important;
-    box-shadow: 0 1px 5px rgba(0,0,0,.05);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, .05);
     min-height: 60px;
 }
 
@@ -71,30 +72,33 @@ a {
     padding-top: .5rem;
 }
 
-@media (min-width:992px) {
+@media (min-width: 992px) {
     .login-shell {
         min-height: 55vh;
         padding-top: .25rem;
     }
 }
 
-.login-card, .register-card {
+.login-card,
+.register-card {
     background: var(--surface);
     border-radius: 12px;
     border: 1px solid #E5E7EB;
-    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
     max-width: 520px;
     width: 100%;
     margin: 3rem auto 2rem;
 }
 
-    .login-card h1, .register-card h1 {
+    .login-card h1,
+    .register-card h1 {
         font-size: 1.8rem;
         font-weight: 700;
     }
 
-@media (max-width:576px) {
-    .login-card, .register-card {
+@media (max-width: 576px) {
+    .login-card,
+    .register-card {
         margin: 2rem 1rem;
     }
 }
@@ -163,26 +167,321 @@ a {
     border-radius: .6rem;
 }
 
+/* ===== Layout og skjermbilder ===== */
+.screen {
+    width: min(1200px, 100%); /* ↑ bredere på PC */
+    margin: 2rem auto;
+    padding: clamp(1.5rem, 2vw, 2.5rem);
+    background: var(--surface);
+    border-radius: 20px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+}
+
+    .screen h2 {
+        text-align: center;
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        letter-spacing: .2rem;
+        margin-bottom: 1.5rem;
+    }
+
+.screen-map {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+.screen-card {
+    width: min(900px, 100%);
+}
+
+@media (max-width: 600px) {
+    .screen {
+        margin: 1rem;
+        padding: 1.25rem;
+        border-radius: 16px;
+    }
+
+    .screen-map {
+        margin: 0;
+        padding: 1rem;
+    }
+}
+
+/* ===== Kart-skjerm ===== */
+.map-form {
+    width: 100%;
+}
+
+.map-and-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.map-box {
+    width: 100%;
+    min-height: 450px;
+    height: min(calc(100vh - 260px), 720px);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.tools {
+    width: 100%;
+    max-width: 320px;
+    background: #F3F3F3;
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-sizing: border-box;
+}
+
+.tool-title {
+    font-weight: 800;
+    margin-bottom: .85rem;
+    font-size: 1.1rem;
+}
+
+.tool-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: .75rem;
+    padding: .85rem 1rem;
+    border: 0;
+    background: #fff;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    transition: background .15s ease;
+}
+
+    .tool-btn:hover,
+    .tool-btn:focus {
+        background: #EEF2FF;
+    }
+
+    .tool-btn.secondary {
+        background: #fff;
+    }
+
+    .tool-btn.danger {
+        background: #FFF5F5;
+    }
+
+        .tool-btn.danger:hover,
+        .tool-btn.danger:focus {
+            background: #FFE1E1;
+        }
+
+@media (max-width: 1100px) {
+    .map-and-tools {
+        grid-template-columns: 1fr;
+    }
+
+    .tools {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .map-box {
+        height: 360px;
+        min-height: 320px;
+    }
+
+    .tool-btn {
+        font-size: 1.05rem;
+    }
+}
+
+/* ===== Skjemaer ===== */
+.meta-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+    .meta-header h2 {
+        margin: 0;
+    }
+
+.back-link {
+    justify-self: start;
+    font-size: .95rem;
+    color: var(--nla-blue);
+    padding: .45rem .75rem;
+    border-radius: 8px;
+    background: #F1F5FF;
+    border: 1px solid #D0DCFF;
+    font-weight: 600;
+}
+
+    .back-link:hover {
+        background: #E1EBFF;
+    }
+
+.meta-form .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.meta-form label {
+    font-weight: 600;
+    margin-bottom: .35rem;
+}
+
+.meta-form .form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+    .meta-form .form-row .half {
+        flex: 1;
+    }
+
+.meta-form .form-control {
+    border-radius: 10px;
+    padding: .85rem 1rem;
+}
+
+.meta-form textarea.form-control {
+    resize: vertical;
+}
+
+.meta-form .text-danger {
+    font-size: .85rem;
+}
+
+@media (max-width: 768px) {
+    .meta-form .form-row {
+        flex-direction: column;
+    }
+}
+
+/* ===== Handlingsknapper ===== */
+.actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.actions-center {
+    justify-content: center;
+}
+
+.actions-split {
+    justify-content: space-between;
+}
+
+.actions button,
+.actions .primary,
+.actions .btn-primary,
+.actions .btn-secondary {
+    min-height: 52px;
+    min-width: 160px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.primary {
+    background: var(--nla-blue);
+    color: #fff;
+    border: none;
+    padding: .85rem 2rem;
+}
+
+    .primary:hover,
+    .primary:focus {
+        background: var(--nla-blue-600);
+    }
+
+.btn-primary {
+    background: var(--nla-blue);
+    border: none;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background: var(--nla-blue-600);
+    }
+
+.btn-secondary {
+    background: #F7F7F9;
+    border: 1px solid #D4D7E2;
+    color: var(--text);
+}
+
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+        background: #ECEEF5;
+    }
+
+@media (max-width: 600px) {
+    .actions,
+    .actions-split {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .actions button,
+        .actions .primary,
+        .actions .btn-primary,
+        .actions .btn-secondary {
+            width: 100%;
+        }
+}
+
+/* ===== Lister/tabeller ===== */
+.obstacle-table-wrapper {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+}
+
+.obstacle-table {
+    min-width: 720px;
+}
+
+@media (max-width: 768px) {
+    .obstacle-table-wrapper {
+        padding: .5rem;
+    }
+}
+
+
 /* ===== Respons / touch ===== */
-@media (max-width:576px) {
+@media (max-width: 576px) {
     html {
         font-size: 17px;
     }
-    /* litt større tekst på små skjermer */
+
     .btn {
         width: 100%;
     }
-    /* knapper i full bredde */
+
     .login-shell {
         padding: 0 .75rem;
     }
 }
 
-@media (min-width:768px) and (max-width:1024px) {
+@media (min-width: 768px) and (max-width: 1024px) {
     html {
         font-size: 18px;
     }
-    /* iPad typografi */
+
     .login-card {
         max-width: 520px;
     }
@@ -197,7 +496,8 @@ a {
         font-size: 1.15rem;
     }
 }
-/* iOS safe-areas */
+
+/* iOS SAFE AREA */
 .login-shell {
     padding-left: max(.75rem, env(safe-area-inset-left));
     padding-right: max(.75rem, env(safe-area-inset-right));
@@ -214,40 +514,29 @@ footer.footer {
     padding: .75rem 0;
 }
 
-/* ===== (valgfritt) TEST – kommenter ut etter verifisering ===== */
-/*
-body::after{
-  content:"CSS: Luftambulanse-tema aktivt";
-  position:fixed; right:8px; bottom:8px;
-  background:#D7261E; color:#fff; padding:4px 8px; font-weight:700;
-  z-index:99999; border-radius:6px;
-}
-*/
 /* ===========================================================
    OBSTACLE / WIZARD-STILER (gjeninnført, tilpasset NLA-tema)
    =========================================================== */
 
-/* Felles kort/wizard-boks */
-.wizard,
-.screen {
+/* Felles kort/wizard-boks – gjelder nå KUN .wizard */
+.wizard {
     margin: 1.5rem auto 2.5rem;
     padding: 1.5rem;
     background: var(--surface);
     border-radius: 14px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    max-width: 900px; /* bredere på PC */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    max-width: 900px;
     text-align: center;
     border: 1px solid #e6e6e6;
 }
 
-    .screen h2, .wizard h2 {
+    .wizard h2 {
         font-weight: 800;
         font-size: 2rem;
         margin-bottom: 24px;
     }
 
 /* Kart-rammer */
-.map-box,
 .map-frame {
     width: 100%;
     height: 520px;
@@ -258,13 +547,13 @@ body::after{
 }
 
 @media (max-width: 800px) {
-    .map-box, .map-frame {
+    .map-frame {
         height: 360px;
     }
 }
 
 @media (min-width: 1024px) {
-    .map-box, .map-frame {
+    .map-frame {
         height: 600px;
     }
 }
@@ -282,14 +571,16 @@ body::after{
 }
 
 @media (min-width: 768px) {
-    .choice-grid, .grid-tiles {
+    .choice-grid,
+    .grid-tiles {
         grid-template-columns: repeat(3, minmax(160px, 1fr));
         gap: 18px;
     }
 }
 
 @media (min-width: 1024px) {
-    .choice-grid, .grid-tiles {
+    .choice-grid,
+    .grid-tiles {
         grid-template-columns: repeat(3, minmax(180px, 1fr));
         gap: 22px;
     }
@@ -308,7 +599,7 @@ body::after{
     padding: 16px 10px;
     cursor: pointer;
     transition: 0.2s ease;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
     .choice-grid .btn-choice:hover,
@@ -330,7 +621,7 @@ body::after{
     max-width: 340px;
     cursor: pointer;
     margin-top: 1rem;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
     transition: background .2s ease;
 }
 
@@ -359,6 +650,7 @@ body {
     background: var(--bg);
     color: var(--text);
 }
+
 .logout-btn {
     font-weight: 600;
     letter-spacing: 0.3px;
@@ -370,6 +662,7 @@ body {
         border-color: #B11F19;
         color: #fff;
     }
+
 /* ==== Brukerinfo i toppmeny (innlogget bruker) ==== */
 
 .user-info {
@@ -398,4 +691,10 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.screen h2, .wizard h2 {
+    font-weight: 800;
+    font-size: 2rem;
+    margin-bottom: 24px;
 }
