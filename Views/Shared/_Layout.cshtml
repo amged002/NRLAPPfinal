@@ -1,27 +1,22 @@
 ﻿@{
     var currentController = (string?)ViewContext.RouteData.Values["controller"] ?? "";
-    // true når vi er på Account-sider (Login/Registrer) → da vil vi skjule menyen
     var hideMenu = string.Equals(currentController, "Account", StringComparison.OrdinalIgnoreCase);
 
-    // Enkel visning av innlogget bruker (bruker e-post som base)
     string? userEmail = User?.Identity?.IsAuthenticated == true ? User.Identity!.Name : null;
     string? userNameShort = null;
     string? userInitials = null;
 
     if (!string.IsNullOrWhiteSpace(userEmail))
     {
-        // vis bare delen før @ som "navn"
         var atIndex = userEmail.IndexOf('@');
         userNameShort = atIndex > 0 ? userEmail[..atIndex] : userEmail;
 
-        // Gjør første bokstav i navnet stor (real -> Real)
         if (!string.IsNullOrWhiteSpace(userNameShort))
         {
             userNameShort = char.ToUpper(userNameShort[0]) +
                             (userNameShort.Length > 1 ? userNameShort[1..] : string.Empty);
         }
 
-        // lag 2 initialer (første og evt. første etter punktum/underscore)
         var parts = userNameShort.Split(new[] { '.', '_', ' ' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 1)
         {
@@ -43,9 +38,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>@ViewData["Title"] - NRLApp</title>
 
-    <!-- CSS: Bootstrap først, deretter vår egen -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- (valgfritt) Bootstrap Icons for logout-ikon -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
@@ -56,39 +49,30 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <!-- Logo (ikke lenke) -->
                 <span class="navbar-brand d-flex align-items-center">
                     <img src="~/img/standard_Luftambulansen.png" class="brand-logo me-2" alt="Logo" />
                 </span>
 
-                <!-- Toggler for mobil -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarNav" aria-controls="navbarNav"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Kollapsbart område -->
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    @* Menyen vises KUN når vi IKKE er på Account-sider *@
                     @if (!hideMenu)
                     {
-                        <ul class="navbar-nav">
+                        <ul class="navbar-nav me-auto">
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Obstacle" asp-action="Area">Skjema</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Obstacle" asp-action="List">Registrerte</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Obstacle" asp-action="Map">Kart</a>
-                            </li>
                         </ul>
 
-                        @* Info om innlogget bruker + Logg ut-knapp til høyre *@
-                        @if (User?.Identity?.IsAuthenticated == true)
-                        {
-                            <div class="ms-auto d-flex align-items-center gap-3">
+                            @if (User?.Identity?.IsAuthenticated == true)
+                            {
                                 <div class="user-info d-flex align-items-center">
                                     @if (!string.IsNullOrWhiteSpace(userInitials))
                                     {
@@ -107,8 +91,7 @@
                                         <i class="bi bi-box-arrow-right"></i> Logg ut
                                     </button>
                                 </form>
-                            </div>
-                        }
+                            }
                     }
                 </div>
             </div>
@@ -127,7 +110,6 @@
         </div>
     </footer>
 
-    <!-- JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
