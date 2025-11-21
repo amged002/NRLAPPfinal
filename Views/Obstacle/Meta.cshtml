@@ -1,4 +1,5 @@
-﻿@model NRLApp.Models.ObstacleMetaVm
+﻿@using NRLApp.Models.Obstacles
+@model ObstacleMetaVm
 
 @{
     ViewData["Title"] = "Registrer hinder";
@@ -8,17 +9,28 @@
     <div class="meta-header">
         <a asp-action="Area" class="back-link">← Tilbake</a>
         <h2>REGISTRER HINDER</h2>
-        <div></div> 
+        <div></div>
     </div>
 
     <form asp-action="Meta" method="post" class="meta-form">
         @Html.AntiForgeryToken()
 
+        <!-- NY: Kategori-dropdown -->
         <div class="form-group">
-            <label asp-for="ObstacleName">Hinder:</label>
-            <input asp-for="ObstacleName" class="form-control" />
-            <span asp-validation-for="ObstacleName" class="text-danger"></span>
+            <label asp-for="Category">Kategori:</label>
+            <select asp-for="Category" class="form-control">
+                <option value="">Velg kategori</option>
+                <option value="Mast/tårn">Mast / tårn</option>
+                <option value="Kraftlinje/kabel">Kraftlinje / kabel</option>
+                <option value="Bygning">Bygning</option>
+                <option value="Kran">Kran</option>
+                <option value="Antenne">Antenne</option>
+                <option value="Midlertidig hinder">Midlertidig hinder</option>
+                <option value="Annet">Annet</option>
+            </select>
         </div>
+
+       
 
         <div class="form-row">
             <div class="form-group half">
@@ -41,11 +53,11 @@
             <textarea asp-for="Description" class="form-control" rows="4"></textarea>
         </div>
 
-        <<div class="actions actions-split">
+        <div class="actions actions-split">
             <button type="submit" name="action" value="draft" class="btn-secondary">
                 Lagre utkast
             </button>
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn nla-primary">
                 Send inn
             </button>
         </div>
