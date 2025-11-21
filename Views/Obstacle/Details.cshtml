@@ -139,7 +139,8 @@
                     <div class="details-row">
                         <dt class="details-label">Registrert</dt>
                         <dd class="details-value">
-                            @(Model.CreatedUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture))
+                            @(Model.CreatedUtc.ToLocalTime()
+                                                        .ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture))
                         </dd>
                     </div>
 
@@ -161,17 +162,23 @@
 
                     <div class="details-row">
                         <dt class="details-label">Innmeldt av</dt>
-                        <dd class="details-value">@(string.IsNullOrWhiteSpace(Model.CreatedByUserName) ? "-" : Model.CreatedByUserName)</dd>
+                        <dd class="details-value">
+                            @(string.IsNullOrWhiteSpace(Model.CreatedByUserName) ? "-" : Model.CreatedByUserName)
+                        </dd>
                     </div>
 
                     <div class="details-row">
                         <dt class="details-label">Behandlet av</dt>
-                        <dd class="details-value">@(string.IsNullOrWhiteSpace(Model.AssignedToUserName) ? "-" : Model.AssignedToUserName)</dd>
+                        <dd class="details-value">
+                            @(string.IsNullOrWhiteSpace(Model.AssignedToUserName) ? "-" : Model.AssignedToUserName)
+                        </dd>
                     </div>
 
                     <div class="details-row">
                         <dt class="details-label">Saks-kommentar</dt>
-                        <dd class="details-value">@(string.IsNullOrWhiteSpace(Model.ReviewComment) ? "-" : Model.ReviewComment)</dd>
+                        <dd class="details-value">
+                            @(string.IsNullOrWhiteSpace(Model.ReviewComment) ? "-" : Model.ReviewComment)
+                        </dd>
                     </div>
                 </dl>
             </div>
@@ -208,23 +215,28 @@
                 </div>
             }
 
-            <div class="actions-under-box">
-                <a asp-action="Edit"
-                   asp-route-id="@Model.Id"
-                   class="btn btn-primary">
-                    Endre
-                </a>
+            @if (!User.IsInRole("Admin") && !User.IsInRole("Approver"))
+            {
+                <!-- ENDRE / SLETT: side-ved-side, plassert rett under info-boksen -->
+                <div class="actions-under-box">
+                    <a asp-action="Edit"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-primary">
+                        Endre
+                    </a>
 
-                <form asp-action="Delete"
-                      asp-route-id="@Model.Id"
-                      method="post"
-                      class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-outline-danger">
-                        Slett
-                    </button>
-                </form>
-            </div>
+                    <form asp-action="Delete"
+                          asp-route-id="@Model.Id"
+                          method="post"
+                          class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="btn btn-outline-danger">
+                            Slett
+                        </button>
+                    </form>
+                </div>
+            }
 
             <div class="details-back-row">
                 <a asp-action="List" class="btn btn-outline-secondary btn-lg">

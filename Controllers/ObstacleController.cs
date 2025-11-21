@@ -37,14 +37,23 @@ namespace NRLApp.Controllers
         // =========================================================
         // 1) TEGN OMRÅDE (AREA) – Første steg
         // =========================================================
+        private bool IsAdmin() => User.IsInRole("Admin");
 
         [HttpGet]
-        public IActionResult Area() => View();
+        public IActionResult Area()
+        {
+            if (IsAdmin())
+                return RedirectToAction("Users", "Admin");
 
+            return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Area(string geoJson)
         {
+            if (IsAdmin())
+                return RedirectToAction("Users", "Admin");
+
             // Må ha GeoJSON, ellers gi feilmelding
             if (string.IsNullOrWhiteSpace(geoJson))
             {
