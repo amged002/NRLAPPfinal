@@ -108,7 +108,6 @@ namespace NRLApp.Controllers
             if (string.Equals(vm.HeightUnit, "ft", StringComparison.OrdinalIgnoreCase))
                 heightMeters = Math.Round(heightMeters * 0.3048, 0);
 
-            // Draft betyr ikke ferdig godkjent hinder
             bool isDraft = string.Equals(action, "draft", StringComparison.OrdinalIgnoreCase) || vm.SaveAsDraft;
 
             // Hent bruker-ID
@@ -116,12 +115,24 @@ namespace NRLApp.Controllers
 
             const string sql = @"
 INSERT INTO obstacles (
-    geojson, obstacle_name, height_m, obstacle_description,
-    is_draft, created_utc, created_by_user_id
+    geojson,
+    obstacle_name,
+    obstacle_category,
+    height_m,
+    obstacle_description,
+    is_draft,
+    created_utc,
+    created_by_user_id
 )
 VALUES (
-    @GeoJson, @Name, @HeightM, @Descr,
-    @IsDraft, UTC_TIMESTAMP(), @CreatedByUserId
+    @GeoJson,
+    @Name,
+    @Category,
+    @HeightM,
+    @Descr,
+    @IsDraft,
+    UTC_TIMESTAMP(),
+    @CreatedByUserId
 );";
 
             using var con = CreateConnection();
@@ -129,13 +140,13 @@ VALUES (
             {
                 GeoJson = geoJsonToSave,
                 Name = vm.ObstacleName,
+                Category = vm.Category,     // 👈 LAGRES I DB
                 HeightM = (int?)Math.Round(heightMeters, 0),
                 Descr = vm.Description,
                 IsDraft = isDraft ? 1 : 0,
                 CreatedByUserId = userId
             });
 
-            // Slett TempData
             DrawJson = null;
 
             return RedirectToAction(nameof(Thanks), new { draft = isDraft });

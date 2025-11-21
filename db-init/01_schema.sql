@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS obstacles (
   id                   INT AUTO_INCREMENT PRIMARY KEY,
   geojson              LONGTEXT      NOT NULL,
   obstacle_name        VARCHAR(200)  NULL,
+  obstacle_category    VARCHAR(100)  NULL, 
   height_m             INT           NULL,
   obstacle_description TEXT          NULL,
   is_draft             TINYINT(1)    NOT NULL DEFAULT 0,

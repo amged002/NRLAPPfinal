@@ -12,6 +12,9 @@ namespace NRLApp.Models.Obstacles
     // IKKE sealed, slik at vi kan arve fra den i ObstacleEditVm
     public class ObstacleMetaVm
     {
+        [Display(Name = "Kategori")]
+        public string? Category { get; set; }   // 👈 NY PROPERTY
+
         [Required(ErrorMessage = "Skriv hva det er.")]
         [Display(Name = "Hinder")]
         public string? ObstacleName { get; set; }
