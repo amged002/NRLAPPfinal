@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NRLApp.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NRLApp.Controllers
 {
@@ -10,6 +13,12 @@ namespace NRLApp.Controllers
     public class AdminController : Controller
     {
         private static readonly string[] AssignableRoles = new[] { "Pilot", "Crew", "Approver" };
+
+        // E-post(er) til brukere som IKKE skal kunne slettes
+        private static readonly string[] ProtectedAdminEmails = new[]
+        {
+            "admin@nrl.local"   // juster hvis dere har et annet hoved-admin-brukernavn
+        };
 
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -72,6 +81,56 @@ namespace NRLApp.Controllers
             await _userManager.AddToRoleAsync(user, vm.Role);
 
             TempData["Status"] = $"Oppdatert rolle for {user.Email ?? user.UserName} til {vm.Role}.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        // =========================================================
+        //  NY FUNKSJON: SLETT BRUKER
+        // =========================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                TempData["Error"] = "Ugyldig bruker-id.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var currentUserId = _userManager.GetUserId(User);
+            if (string.Equals(currentUserId, userId, StringComparison.Ordinal))
+            {
+                TempData["Error"] = "Du kan ikke slette din egen bruker mens du er innlogget.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["Error"] = "Fant ikke bruker.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Beskytt hoved-admin-brukere mot sletting
+            if (!string.IsNullOrWhiteSpace(user.Email) &&
+                ProtectedAdminEmails.Contains(user.Email, StringComparer.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Denne brukeren er systemadministrator og kan ikke slettes.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+            {
+                var msg = string.Join(" ", result.Errors.Select(e => e.Description));
+                TempData["Error"] = $"Klarte ikke å slette brukeren. {msg}";
+            }
+            else
+            {
+                TempData["Status"] = $"Brukeren {user.Email ?? user.UserName} er slettet.";
+            }
+
             return RedirectToAction(nameof(Users));
         }
     }
