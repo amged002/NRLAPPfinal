@@ -2,6 +2,9 @@
 @{
     ViewData["Title"] = "Administrer roller";
     var roles = ViewBag.AssignableRoles as string[] ?? Array.Empty<string>();
+
+    // Samme e-post som vi beskytter i controlleren
+    var protectedAdminEmails = new[] { "admin@nrl.local" };
 }
 
 <div class="screen">
@@ -27,12 +30,15 @@
                     <th>E-post</th>
                     <th class="w-25">Gjeldende rolle</th>
                     <th class="w-25">Ny rolle</th>
-                    <th></th>
+                    <th class="text-end">Slett</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model.Users)
                 {
+                    var isProtected = !string.IsNullOrWhiteSpace(user.Email)
+                    && protectedAdminEmails.Contains(user.Email, StringComparer.OrdinalIgnoreCase);
+
                     <tr>
                         <td>@(user.Email ?? "(uten e-post)")</td>
                         <td>
@@ -52,13 +58,33 @@
                                 <select name="Role" class="form-select">
                                     @foreach (var role in roles)
                                     {
-                                        <option value="@role" selected="@(string.Equals(role, user.CurrentRole, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@role</option>
+                                        <option value="@role" selected="@(string.Equals(role, user.CurrentRole, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                                            @role
+                                        </option>
                                     }
                                 </select>
                                 <button type="submit" class="btn btn-primary">Oppdater</button>
                             </form>
                         </td>
-                        <td></td>
+                        <td class="text-end">
+                            @if (isProtected)
+                            {
+                                <span class="text-muted">Kan ikke slettes</span>
+                            }
+                            else
+                            {
+                                <form asp-action="DeleteUser"
+                                      method="post"
+                                      onsubmit="return confirm('Er du sikker på at du vil slette denne brukeren?');"
+                                      class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        Slett
+                                    </button>
+                                </form>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
