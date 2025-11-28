@@ -17,10 +17,34 @@
                 </div>
 
                 <div class="col-sm-4 col-lg-3">
-                    <label class="form-label" for="filter-name">Hinder</label>
-                    <input type="text" class="form-control" id="filter-name" name="ObstacleName" value="@Model.Filter.ObstacleName" />
+                    <label class="form-label" for="filter-category">Kategori</label>
+                    <select class="form-select" id="filter-category" name="Category">
+                        <option value="" selected="@(string.IsNullOrEmpty(Model.Filter.Category))">
+                            Velg kategori
+                        </option>
+                        <option value="Mast / tårn" selected="@(Model.Filter.Category == "Mast / tårn")">
+                            Mast / tårn
+                        </option>
+                        <option value="Kraftlinje / kabel" selected="@(Model.Filter.Category == "Kraftlinje / kabel")">
+                            Kraftlinje / kabel
+                        </option>
+                        <option value="Bygning" selected="@(Model.Filter.Category == "Bygning")">
+                            Bygning
+                        </option>
+                        <option value="Kran" selected="@(Model.Filter.Category == "Kran")">
+                            Kran
+                        </option>
+                        <option value="Antenne" selected="@(Model.Filter.Category == "Antenne")">
+                            Antenne
+                        </option>
+                        <option value="Midlertidig hinder" selected="@(Model.Filter.Category == "Midlertidig hinder")">
+                            Midlertidig hinder
+                        </option>
+                        <option value="Annet" selected="@(Model.Filter.Category == "Annet")">
+                            Annet
+                        </option>
+                    </select>
                 </div>
-
                 <div class="col-sm-4 col-lg-2">
                     <label class="form-label" for="filter-min-height">Min høyde (m)</label>
                     <input type="number" class="form-control" id="filter-min-height" name="MinHeightMeters" value="@Model.Filter.MinHeightMeters" />
@@ -37,9 +61,24 @@
                         <option value="" selected="@(Model.Filter.Status is null)">Alle</option>
                         <option value="Draft" selected="@(Model.Filter.Status == ObstacleListStatusFilter.Draft)">Utkast</option>
                         <option value="Pending" selected="@(Model.Filter.Status == ObstacleListStatusFilter.Pending)">Avventer</option>
+                        <option value="Approved" selected="@(Model.Filter.Status == ObstacleListStatusFilter.Approved)">Godkjent</option>
+                        <option value="Rejected" selected="@(Model.Filter.Status == ObstacleListStatusFilter.Rejected)">Avvist</option>
                     </select>
                 </div>
-
+                <!-- NYTT: Organisasjon -->
+                <div class="col-sm-4 col-lg-2">
+                    <label class="form-label" for="filter-org">Organisasjon</label>
+                    <select class="form-select" id="filter-org" name="OrganizationId">
+                        <option value="">Alle</option>
+                        @foreach (var org in Model.Organizations)
+                        {
+                            <option value="@org.Id"
+                                    selected="@(Model.Filter.OrganizationId == org.Id)">
+                                @org.Name
+                            </option>
+                        }
+                    </select>
+                </div>
                 <div class="col-sm-4 col-lg-2">
                     <label class="form-label" for="filter-created-from">Registrert fra</label>
                     <input type="date" class="form-control" id="filter-created-from" name="CreatedFrom" value="@(Model.Filter.CreatedFrom?.ToString("yyyy-MM-dd"))" />
@@ -66,7 +105,7 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Hinder</th>
+                    <th>Kategori</th>
                     <th>Høyde (m)</th>
                     <th>Status</th>
                     <th>Registrert</th>
@@ -80,7 +119,7 @@
                 {
                     <tr>
                         <td>@x.Id</td>
-                        <td>@(string.IsNullOrWhiteSpace(x.ObstacleName) ? "(uten navn)" : x.ObstacleName)</td>
+                        <td>@(string.IsNullOrWhiteSpace(x.Category) ? "(uten kategori)" : x.Category)</td>
                         <td>@(x.HeightMeters?.ToString() ?? "-")</td>
                         <td>
                             @{
