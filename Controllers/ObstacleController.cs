@@ -223,10 +223,11 @@ VALUES (
                 parameters.Add("Id", filter.Id.Value);
             }
 
-            if (!string.IsNullOrWhiteSpace(filter.ObstacleName))
+            // NYTT: filtrer på kategori (obstacle_category)
+            if (!string.IsNullOrWhiteSpace(filter.Category))
             {
-                where.Add("LOWER(o.obstacle_name) LIKE @ObstacleName");
-                parameters.Add("ObstacleName", $"%{filter.ObstacleName.Trim().ToLowerInvariant()}%");
+                where.Add("LOWER(o.obstacle_category) LIKE @Category");
+                parameters.Add("Category", $"%{filter.Category.Trim().ToLowerInvariant()}%");
             }
 
             if (filter.MinHeightMeters.HasValue)
@@ -241,11 +242,37 @@ VALUES (
                 parameters.Add("MaxHeight", filter.MaxHeightMeters.Value);
             }
 
+            // NYTT: mer detaljert status-filter
             if (filter.Status.HasValue)
             {
-                where.Add("o.is_draft = @IsDraft");
-                parameters.Add("IsDraft",
-                    filter.Status.Value == ObstacleListStatusFilter.Draft ? 1 : 0);
+                switch (filter.Status.Value)
+                {
+                    case ObstacleListStatusFilter.Draft:
+                        where.Add("o.is_draft = 1");
+                        break;
+
+                    case ObstacleListStatusFilter.Pending:
+                        // ikke utkast, ikke godkjent/avvist ennå
+                        where.Add("o.is_draft = 0 AND (o.review_status IS NULL OR o.review_status = 'Pending')");
+                        break;
+
+                    case ObstacleListStatusFilter.Approved:
+                        where.Add("o.is_draft = 0 AND o.review_status = @StatusApproved");
+                        parameters.Add("StatusApproved", ObstacleStatus.Approved.ToString());
+                        break;
+
+                    case ObstacleListStatusFilter.Rejected:
+                        where.Add("o.is_draft = 0 AND o.review_status = @StatusRejected");
+                        parameters.Add("StatusRejected", ObstacleStatus.Rejected.ToString());
+                        break;
+                }
+            }
+
+            // NYTT: filtrering på organisasjon
+            if (filter.OrganizationId.HasValue)
+            {
+                where.Add("o.organization_id = @OrgId");
+                parameters.Add("OrgId", filter.OrganizationId.Value);
             }
 
             var createdFromUtc = NormalizeToUtc(filter.CreatedFrom);
@@ -267,6 +294,7 @@ VALUES (
             var sql = $@"
 SELECT o.id,
        o.obstacle_name        AS ObstacleName,
+       o.obstacle_category    AS Category,
        o.height_m             AS HeightMeters,
        o.is_draft             AS IsDraft,
        o.created_utc          AS CreatedUtc,
@@ -284,10 +312,17 @@ ORDER BY o.id DESC;";
 
             var rows = await con.QueryAsync<ObstacleListItem>(sql, parameters);
 
+            // NYTT: hent organisasjoner til nedtrekksliste
+            var orgs = await con.QueryAsync<OrganizationVm>(@"
+        SELECT id AS Id, name AS Name
+        FROM organizations
+        ORDER BY name;");
+
             return View(new ObstacleListVm
             {
                 Filter = filter,
-                Items = rows
+                Items = rows,
+                Organizations = orgs
             });
         }
 

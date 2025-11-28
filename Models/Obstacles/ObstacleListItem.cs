@@ -5,9 +5,14 @@ public class ObstacleListItem
     /// <summary>
     /// Minimal representasjon av et hinder slik det vises i tabellen.
     /// Inneholder også review- og organisasjonsinformasjon til badges
-    /// <summary>
+    /// </summary>
     public int Id { get; set; }
-    public string? ObstacleName { get; set; }
+
+    public string? ObstacleName { get; set; } // beholdes for senere bruk / detaljer
+
+    // NYTT: kategori, brukes i tabell og filtrering
+    public string? Category { get; set; }
+
     public int? HeightMeters { get; set; }
     public bool IsDraft { get; set; }
     public DateTime CreatedUtc { get; set; }
