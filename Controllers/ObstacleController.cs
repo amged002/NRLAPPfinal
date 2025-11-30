@@ -389,28 +389,39 @@ ORDER BY o.id DESC;";
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            // Admin + Approver kan se alle hindere
+            var isReviewer = User.IsInRole("Admin") || User.IsInRole("Approver");
+
             const string sql = @"
 SELECT o.id,
        o.geojson              AS GeoJson,
        o.obstacle_name        AS ObstacleName,
        o.height_m             AS HeightMeters,
        o.obstacle_description AS Description,
-       o.image_path           AS ImagePath,
        o.is_draft             AS IsDraft,
        o.created_utc          AS CreatedUtc,
        o.review_status        AS ReviewStatus,
        o.review_comment       AS ReviewComment,
        createdUser.UserName   AS CreatedByUserName,
        assignedUser.UserName  AS AssignedToUserName
-
 FROM obstacles o
 LEFT JOIN AspNetUsers createdUser  ON createdUser.Id = o.created_by_user_id
 LEFT JOIN AspNetUsers assignedUser ON assignedUser.Id = o.assigned_to_user_id
-WHERE o.id = @id;";
+WHERE o.id = @Id
+  AND (
+        @IsReviewer = 1
+        OR o.created_by_user_id = @UserId
+      );";
 
             using var con = CreateConnection();
-            var row = await con.QuerySingleOrDefaultAsync<ObstacleDetailsVm>(sql, new { id });
+            var row = await con.QuerySingleOrDefaultAsync<ObstacleDetailsVm>(sql, new
+            {
+                Id = id,
+                UserId = userId,
+                IsReviewer = isReviewer ? 1 : 0
+            });
 
+            // Viser 404 i stedet for å avsløre at hinderet finnes
             if (row == null)
                 return NotFound();
 
@@ -477,26 +488,35 @@ WHERE id = @id
             if (string.Equals(vm.HeightUnit, "ft", StringComparison.OrdinalIgnoreCase))
                 heightMeters = Math.Round(heightMeters * 0.3048, 0);
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             const string sql = @"
 UPDATE obstacles
 SET obstacle_name        = @Name,
     height_m             = @HeightM,
     obstacle_description = @Descr,
     is_draft             = @IsDraft
-WHERE id = @Id;";
+WHERE id = @Id
+  AND created_by_user_id = @UserId;";
 
             using var con = CreateConnection();
-            await con.ExecuteAsync(sql, new
+            var affected = await con.ExecuteAsync(sql, new
             {
                 Id = vm.Id,
+                UserId = userId,
                 Name = vm.ObstacleName,
                 HeightM = (int?)Math.Round(heightMeters, 0),
                 Descr = vm.Description,
                 IsDraft = vm.SaveAsDraft ? 1 : 0
             });
 
+            // Hvis ingen rader ble oppdatert → ikke ditt hinder
+            if (affected == 0)
+                return Forbid();
+
             return RedirectToAction(nameof(Details), new { id = vm.Id });
         }
+
 
         // =========================================================
         // 7) SLETT HINDER (kun eier)
