@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http; 
+using Microsoft.AspNetCore.Http;
 
 namespace NRLApp.Models.Obstacles
 {
@@ -13,7 +13,7 @@ namespace NRLApp.Models.Obstacles
 
     /// <summary>
     /// ViewModel for metadata-skjemaet.
-    /// Gjort public slik at ObstacleEditVm kan arve feltene.
+    /// ObstacleEditVm arver fra denne.
     /// </summary>
     public class ObstacleMetaVm
     {
@@ -34,11 +34,11 @@ namespace NRLApp.Models.Obstacles
 
         [Display(Name = "Beskrivelse")]
         public string? Description { get; set; }
-        
 
         [Display(Name = "Lagre som utkast")]
         public bool SaveAsDraft { get; set; }
 
+        // Filopplasting av bilde (det du har i ObstacleController)
         [Display(Name = "Bilde av hinder (valgfritt)")]
         public IFormFile? ImageFile { get; set; }
     }

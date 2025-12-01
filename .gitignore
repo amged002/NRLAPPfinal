@@ -1,24 +1,56 @@
+#############################
+# NRLAPP .gitignore
+#############################
+
+# Runtime uploads (ALDRI legg på GitHub)
+wwwroot/uploads/
+
+# Build output
 bin/
 obj/
-/packages/
-riderModule.iml
-/_ReSharper.Caches/.DS_Store
-.idea/
-# IDE/cache
-.vs/
-.vscode/
+dist/
+publish/
 
-# Build
-bin/
-obj/
+# User-specific files
+*.user
+*.userosscache
+*.suo
 
-# VS-cache og diverse
+# Logs
+*.log
+logs/
+log/
+
+# Database files (SQLite etc.)
 *.db
 *.db-shm
 *.db-wal
+
+# Rider / ReSharper / IDEA
+.idea/
+*.iml
+_ReSharper.Caches/
+
+# VS Code & Visual Studio
+.vscode/
+.vs/
+
+# NuGet packages
+/packages/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+docker-compose.*.yml
+*.tar
+
+# Node (in case React/JS pops in)
+node_modules/
+
+# Misc
+*.cache
 *.vsidx
 *.v17
-*.cache
-*.user
-
-

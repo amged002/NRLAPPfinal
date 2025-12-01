@@ -12,16 +12,20 @@
         <div></div>
     </div>
 
-    <form asp-action="Meta" method="post" enctype="multipart/form-data" class="meta-form">
+    <form asp-action="Meta"
+          method="post"
+          enctype="multipart/form-data"
+          class="meta-form">
         @Html.AntiForgeryToken()
 
+        <!-- BILDE (valgfritt) -->
         <div class="form-group">
             <label asp-for="ImageFile">Bilde av hinder (valgfritt)</label>
             <input asp-for="ImageFile" type="file" class="form-control" />
             <span asp-validation-for="ImageFile" class="text-danger"></span>
         </div>
 
-        <!-- NY: Kategori-dropdown -->
+        <!-- Kategori -->
         <div class="form-group">
             <label asp-for="Category">Kategori:</label>
             <select asp-for="Category" class="form-control">
@@ -34,9 +38,8 @@
                 <option value="Midlertidig hinder">Midlertidig hinder</option>
                 <option value="Annet">Annet</option>
             </select>
+            <span asp-validation-for="Category" class="text-danger"></span>
         </div>
-
-       
 
         <div class="form-row">
             <div class="form-group half">
@@ -57,6 +60,7 @@
         <div class="form-group">
             <label asp-for="Description">Beskrivelse:</label>
             <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
         <div class="actions actions-split">
