@@ -487,6 +487,7 @@ WHERE id = @id
             if (string.Equals(vm.HeightUnit, "ft", StringComparison.OrdinalIgnoreCase))
                 heightMeters = Math.Round(heightMeters * 0.3048, 0);
 
+            // 🔒 Hent innlogget bruker
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             const string sql = @"
@@ -509,7 +510,7 @@ WHERE id = @Id
                 IsDraft = vm.SaveAsDraft ? 1 : 0
             });
 
-            // Hvis ingen rader ble oppdatert → ikke ditt hinder
+            // Hvis ingen rader ble endret → ikke ditt hinder
             if (affected == 0)
                 return Forbid();
 
@@ -582,14 +583,29 @@ LIMIT 1;";
         [Authorize(Roles = "Admin,Approver")]
         [ValidateAntiForgeryToken]
         public Task<IActionResult> Approve(int id, string? reviewComment)
-            => SetReviewStatus(id, ObstacleStatus.Approved, reviewComment);
+        {
+            // 🔒 XSS / spam / overflow-beskyttelse
+            if (!string.IsNullOrWhiteSpace(reviewComment) && reviewComment.Length > 1000)
+            {
+                reviewComment = reviewComment[..1000]; // klipp til 1000 tegn
+            }
+
+            return SetReviewStatus(id, ObstacleStatus.Approved, reviewComment);
+        }
 
         [HttpPost]
         [Authorize(Roles = "Admin,Approver")]
         [ValidateAntiForgeryToken]
         public Task<IActionResult> Reject(int id, string? reviewComment)
-            => SetReviewStatus(id, ObstacleStatus.Rejected, reviewComment);
+        {
+            // 🔒 XSS / spam / overflow-beskyttelse
+            if (!string.IsNullOrWhiteSpace(reviewComment) && reviewComment.Length > 1000)
+            {
+                reviewComment = reviewComment[..1000]; // klipp til 1000 tegn
+            }
 
+            return SetReviewStatus(id, ObstacleStatus.Rejected, reviewComment);
+        }
         // Felles logikk for Approve/Reject
         private async Task<IActionResult> SetReviewStatus(int id, ObstacleStatus status, string? reviewComment)
         {
