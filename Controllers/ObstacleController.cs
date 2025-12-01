@@ -205,12 +205,11 @@ VALUES (
             await con.ExecuteAsync(sql, new
             {
                 GeoJson = geoJsonToSave,
-                // Hvis ObstacleName er tom, bruker vi kategori-navnet som "tittel"
                 Name = string.IsNullOrWhiteSpace(vm.ObstacleName) ? vm.Category : vm.ObstacleName,
                 Category = vm.Category,
                 HeightM = (int?)Math.Round(heightMeters, 0),
                 Descr = vm.Description,
-                ImagePath = imagePath,
+                ImagePath = imagePath,   // ← viktig
                 IsDraft = isDraft ? 1 : 0,
                 CreatedByUserId = userId,
                 OrganizationId = orgId
@@ -391,13 +390,13 @@ ORDER BY o.id DESC;";
 
             // Admin + Approver kan se alle hindere
             var isReviewer = User.IsInRole("Admin") || User.IsInRole("Approver");
-
             const string sql = @"
 SELECT o.id,
        o.geojson              AS GeoJson,
        o.obstacle_name        AS ObstacleName,
        o.height_m             AS HeightMeters,
        o.obstacle_description AS Description,
+       o.image_path           AS ImagePath,
        o.is_draft             AS IsDraft,
        o.created_utc          AS CreatedUtc,
        o.review_status        AS ReviewStatus,
@@ -528,17 +527,50 @@ WHERE id = @Id
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            const string sql = @"
-DELETE FROM obstacles
-WHERE id = @id
-  AND created_by_user_id = @UserId;";
+            await using var con = CreateConnection();
 
-            using var con = CreateConnection();
-            var affected = await con.ExecuteAsync(sql, new { id, UserId = userId });
+            // 1) Hent image_path OG sjekk at brukeren eier hinderet
+            const string selectSql = @"
+SELECT image_path
+FROM obstacles
+WHERE id = @Id
+  AND created_by_user_id = @UserId
+LIMIT 1;";
 
-            if (affected == 0)
+            var imagePath = await con.ExecuteScalarAsync<string?>(selectSql, new
+            {
+                Id = id,
+                UserId = userId
+            });
+
+            // Hvis null -> enten finnes ikke, eller du eier det ikke
+            if (imagePath == null)
                 return Forbid();
 
+            // 2) Slett hinder fra DB
+            const string deleteSql = @"DELETE FROM obstacles WHERE id = @Id AND created_by_user_id = @UserId;";
+            await con.ExecuteAsync(deleteSql, new { Id = id, UserId = userId });
+
+            // 3) Slett bilde fra wwwroot/uploads hvis det finnes
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(imagePath))
+                {
+                    var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", imagePath);
+
+                    if (System.IO.File.Exists(fullPath))
+                    {
+                        System.IO.File.Delete(fullPath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ikke kast feil — men logg hvis dere har logger
+                Console.WriteLine("FEIL VED FILSLETTING: " + ex.Message);
+            }
+
+            TempData["StatusMessage"] = "Hinder og bilde ble slettet.";
             return RedirectToAction(nameof(List));
         }
 

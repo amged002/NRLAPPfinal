@@ -140,30 +140,29 @@
                         <dt class="details-label">Registrert</dt>
                         <dd class="details-value">
                             @(Model.CreatedUtc.ToLocalTime()
-                                    .ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture))
+                                                        .ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture))
                         </dd>
                     </div>
 
                     <div class="details-row">
                         <dt class="details-label">Beskrivelse</dt>
                         <dd class="details-value">
-                            @(
-                                    string.IsNullOrWhiteSpace(Model.Description)
-                                    ? "-"
-                                    : Model.Description
-                                    )
+                            @(string.IsNullOrWhiteSpace(Model.Description)
+                                                        ? "-"
+                                                        : Model.Description)
                         </dd>
                     </div>
-                    @* FIX: Wrap markup in braces for control-flow statement *@
+
+                    @* Bilde – Vis/Skjul-knapp inne i detaljboksen *@
                     @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
                     {
                         <div class="details-row">
-                            <div class="details-label">Bilde</div>
-                            <div class="details-value">
+                            <dt class="details-label">Bilde</dt>
+                            <dd class="details-value">
                                 <button type="button"
-                                        class="btn btn-primary btn-sm"
-                                        id="showImageBtn">
-                                    Vis
+                                        id="showImageBtn"
+                                        class="btn btn-outline-primary btn-sm">
+                                    Vis bilde
                                 </button>
 
                                 <div id="imageSection" class="mt-2 d-none">
@@ -171,9 +170,10 @@
                                          alt="Bilde av hinderet"
                                          class="img-fluid rounded" />
                                 </div>
-                            </div>
+                            </dd>
                         </div>
                     }
+
                     <div class="details-row">
                         <dt class="details-label">Saksstatus</dt>
                         <dd class="details-value">@statusText</dd>
@@ -182,21 +182,27 @@
                     <div class="details-row">
                         <dt class="details-label">Innmeldt av</dt>
                         <dd class="details-value">
-                            @(string.IsNullOrWhiteSpace(Model.CreatedByUserName) ? "-" : Model.CreatedByUserName)
+                            @(string.IsNullOrWhiteSpace(Model.CreatedByUserName)
+                                                        ? "-"
+                                                        : Model.CreatedByUserName)
                         </dd>
                     </div>
 
                     <div class="details-row">
                         <dt class="details-label">Behandlet av</dt>
                         <dd class="details-value">
-                            @(string.IsNullOrWhiteSpace(Model.AssignedToUserName) ? "-" : Model.AssignedToUserName)
+                            @(string.IsNullOrWhiteSpace(Model.AssignedToUserName)
+                                                        ? "-"
+                                                        : Model.AssignedToUserName)
                         </dd>
                     </div>
 
                     <div class="details-row">
                         <dt class="details-label">Saks-kommentar</dt>
                         <dd class="details-value">
-                            @(string.IsNullOrWhiteSpace(Model.ReviewComment) ? "-" : Model.ReviewComment)
+                            @(string.IsNullOrWhiteSpace(Model.ReviewComment)
+                                                        ? "-"
+                                                        : Model.ReviewComment)
                         </dd>
                     </div>
                 </dl>
@@ -236,7 +242,6 @@
 
             @if (!User.IsInRole("Admin") && !User.IsInRole("Approver"))
             {
-                <!-- ENDRE / SLETT: side-ved-side, plassert rett under info-boksen -->
                 <div class="actions-under-box">
                     <a asp-action="Edit"
                        asp-route-id="@Model.Id"
@@ -306,7 +311,6 @@
         })();
     </script>
 
-    <!-- NYTT: toggle for "Vis bilde"-knappen -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var btn = document.getElementById("showImageBtn");
@@ -314,15 +318,12 @@
 
             if (btn && section) {
                 btn.addEventListener("click", function () {
-
-                    // Vis/skjul selve bildet
                     section.classList.toggle("d-none");
 
-                    // Endre knappetekst
                     if (section.classList.contains("d-none")) {
-                        btn.textContent = "Vis";
+                        btn.textContent = "Vis bilde";
                     } else {
-                        btn.textContent = "Skjul";
+                        btn.textContent = "Skjul bilde";
                     }
                 });
             }
