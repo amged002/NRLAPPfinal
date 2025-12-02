@@ -124,6 +124,12 @@ namespace NRLApp.Controllers
 
             bool isDraft = string.Equals(action, "draft", StringComparison.OrdinalIgnoreCase) || vm.SaveAsDraft;
 
+            if (heightMeters > 300)
+            {
+                ModelState.AddModelError(nameof(vm.HeightValue), "Høyden kan ikke overstige 300 meter.");
+                return View(vm);
+            }
+
             // Hent bruker-ID
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -487,7 +493,13 @@ WHERE id = @id
             if (string.Equals(vm.HeightUnit, "ft", StringComparison.OrdinalIgnoreCase))
                 heightMeters = Math.Round(heightMeters * 0.3048, 0);
 
-            // 🔒 Hent innlogget bruker
+            if (heightMeters > 300)
+            {
+                ModelState.AddModelError(nameof(vm.HeightValue), "Høyden kan ikke overstige 300 meter.");
+                return View(vm);
+            }
+
+            // Hent innlogget bruker
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             const string sql = @"
@@ -510,7 +522,7 @@ WHERE id = @Id
                 IsDraft = vm.SaveAsDraft ? 1 : 0
             });
 
-            // Hvis ingen rader ble endret → ikke ditt hinder
+            // Hvis ingen rader ble endret - ikke ditt hinder
             if (affected == 0)
                 return Forbid();
 
@@ -584,7 +596,7 @@ LIMIT 1;";
         [ValidateAntiForgeryToken]
         public Task<IActionResult> Approve(int id, string? reviewComment)
         {
-            // 🔒 XSS / spam / overflow-beskyttelse
+            // XSS / spam / overflow-beskyttelse
             if (!string.IsNullOrWhiteSpace(reviewComment) && reviewComment.Length > 1000)
             {
                 reviewComment = reviewComment[..1000]; // klipp til 1000 tegn
@@ -598,7 +610,7 @@ LIMIT 1;";
         [ValidateAntiForgeryToken]
         public Task<IActionResult> Reject(int id, string? reviewComment)
         {
-            // 🔒 XSS / spam / overflow-beskyttelse
+            // XSS / spam / overflow-beskyttelse
             if (!string.IsNullOrWhiteSpace(reviewComment) && reviewComment.Length > 1000)
             {
                 reviewComment = reviewComment[..1000]; // klipp til 1000 tegn
