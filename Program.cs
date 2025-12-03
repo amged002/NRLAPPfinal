@@ -1,11 +1,11 @@
 ﻿using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using NRLApp.Data;
-
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.Cookies;
 // Legg til denne:
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
@@ -29,23 +29,38 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 // === IDENTITY (enkle krav i dev) ===
+// === IDENTITY (styrket sikkerhet) ===
 builder.Services
     .AddIdentity<IdentityUser, IdentityRole>(opt =>
     {
-        opt.Password.RequiredLength = 8;
+        // Passord-krav
+        opt.Password.RequiredLength = 10;
         opt.Password.RequireNonAlphanumeric = false;
-        opt.Password.RequireDigit = false;
-        opt.Password.RequireUppercase = false;
+        opt.Password.RequireDigit = true;
+        opt.Password.RequireUppercase = true;
         opt.Password.RequireLowercase = true;
+
+        // Lockout-innstillinger
+        opt.Lockout.MaxFailedAccessAttempts = 5;                       // etter 5 feil
+        opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10); // låses i 10 min
+        opt.Lockout.AllowedForNewUsers = true;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
 
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     opt.LoginPath = "/Account/Login";
     opt.AccessDeniedPath = "/Account/AccessDenied";
     opt.SlidingExpiration = true;
+
+    // SIKKERHET:
+    opt.Cookie.Name = "NRLApp.Auth";                     // unikt navn
+    opt.Cookie.HttpOnly = true;                          // ikke lesbar fra JS
+    opt.Cookie.SameSite = SameSiteMode.Lax;              // beskytter mot CSRF for de fleste scenarier
+    opt.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    // (i produksjon bak HTTPS kan dere sette .Always, men da må appen kjøre på https)
 });
 
 // === PORT-OPPSETT SOM FUNKER BÅDE LOKALT OG I DOCKER ===
@@ -65,7 +80,15 @@ builder.Logging.AddSimpleConsole(o =>
 
 // MVC + Session
 builder.Services.AddControllersWithViews();
-builder.Services.AddSession(o => o.IdleTimeout = TimeSpan.FromHours(4));
+builder.Services.AddSession(o =>
+{
+    o.IdleTimeout = TimeSpan.FromHours(4);
+
+    // SIKKERHET:
+    o.Cookie.HttpOnly = true;
+    o.Cookie.SameSite = SameSiteMode.Lax;
+    o.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
 
 // (valgfritt) språk
 var defaultCulture = new CultureInfo("en-US");

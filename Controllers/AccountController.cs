@@ -45,7 +45,7 @@ namespace NRLApp.Controllers
                 model.Email,
                 model.Password,
                 model.RememberMe,
-                lockoutOnFailure: false);
+                lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
@@ -109,12 +109,26 @@ namespace NRLApp.Controllers
 
             if (result.Succeeded)
             {
+                // Sørg for at brukeren kan bli låst ved brute force
+                await _userManager.SetLockoutEnabledAsync(user, true);
+
                 TempData["RegisterSuccess"] = "Bruker opprettet. Logg inn for å fortsette.";
                 return RedirectToAction("Login");
             }
 
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+            // Hvis det er passordfeil → vis norsk tekst
+            var errorCodes = result.Errors.Select(e => e.Code).ToHashSet();
+            if (errorCodes.Any(code => code.StartsWith("Password")))
+            {
+                ModelState.AddModelError(string.Empty,
+                    "Passordet er for svakt. Krav: minst 10 tegn, må inneholde både store og små bokstaver og minst ett tall.");
+            }
+            else
+            {
+                // fallback – andre typer feil (unik e-post osv.)
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+            }
 
             return View(model);
         }
