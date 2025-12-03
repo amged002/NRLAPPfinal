@@ -151,10 +151,12 @@ Dette er gjort klart i arkitekturen og kan bygges ut videre.
 
 ---
 
-Dokumentasjon
+## 📚 Dokumentasjon
+
 - [Systemarkitektur](docs/Systemarkitektur.md)
 - [Mobiltilpasning](docs/Mobiltilpasning.md)
 - [Testing og testresultater](docs/Testing.md)
+
 
 
 👥 Team
