@@ -1,68 +1,23 @@
-# NRL Hindermeldingssystem  
-Et komplett system for registrering, behandling og godkjenning av luftfartshindre.  
+# 🗺️ NRLApp – IS-200 Programmeringsprosjekt (Høst 2025)
 
+NRLApp er en ASP.NET Core 9 MVC-applikasjon som lar piloter registrere luftfartshindre via karttegning og skjema, og gjør det mulig for Approvere og Admin å behandle og godkjenne innsendelser.  
+Løsningen kjører i Visual Studio gjennom Docker Compose, som starter både webapplikasjonen og MariaDB-databasen.
 
----
-
-# Innholdsfortegnelse
-1. Oversikt  
-2. Systemarkitektur  
-3. Hvordan kjøre systemet (Docker)  
-4. Brukerroller og tilgangskontroll  
-5. Funksjonalitet  
-6. Datamodell (MariaDB)  
-7. WMS / Permalenker / Kartlag (Avansert)  
-8. Organisasjoner (Avansert)  
-9. Sikkerhetstiltak  
-10. Testing  
-11. Dokumentasjonsstruktur  
-12. Videre arbeid  
+Dette prosjektet ble utviklet av **Gruppe 15** som del av IS-200 Programmeringsprosjekt ved Universitetet i Agder.
 
 ---
 
-# 1. Oversikt
+# Teknologi og nøkkelfunksjoner
 
-NRL Hindermeldingssystem lar piloter og crew registrere hindringer direkte i kart, samt lar registerfører (Approver) behandle og godkjenne disse.
+- **ASP.NET Core 9 MVC**
+- **Identity med roller:** Pilot, Approver, Admin
+- **MariaDB** (via Dapper + EF Core)
+- **Leaflet-kart** (punkt og linje)
+- **Sikker bildeopplasting** med validering og automatisk sletting
+- **Filtrering** (kategori, status, organisasjon, høyde, dato)
+- **Rolle- og ID-basert tilgangskontroll**
 
-Systemet tilbyr:
-
-✔ ASP.NET Core MVC  
-✔ ASP.NET Identity (brukere + roller)  
-✔ Leaflet kartløsning  
-✔ MariaDB via Docker  
-✔ Dapper for spørringer  
-✔ Pilot, Crew, Approver og Admin-roller  
-✔ Mobiltilpasset frontend  
-
----
-
-# 2. Systemarkitektur
-
-```
-┌──────────────────────────┐
-│     Nettleser / Klient   │
-│  Pilot / Crew / Approver │
-│    Leaflet + Bootstrap   │
-└───────────┬──────────────┘
-            │ HTTP (MVC)
-┌───────────▼──────────────┐
-│   ASP.NET Core Backend   │
-│ Kontrollere:             │
-│  - Account               │
-│  - Admin                 │
-│  - Obstacle              │
-│ Identity / Dapper        │
-└───────────┬──────────────┘
-            │ SQL
-┌───────────▼──────────────┐
-│      MariaDB (Docker)    │
-│  obstacles + aspnetusers │
-└──────────────────────────┘
-```
-
----
-
-# 3. Hvordan kjøre systemet (Docker)
+# Hvordan kjøre systemet (Docker)
 
 ### ▶ Start systemet
 ```
@@ -94,7 +49,7 @@ Brukes for å gi roller til nye brukere.
 
 ---
 
-# 4. Brukerroller og tilgangskontroll
+# Brukerroller og tilgangskontroll
 
 ## Pilot / Crew
 - Kan registrere hinder (punkt / linje / område)
@@ -110,23 +65,24 @@ Brukes for å gi roller til nye brukere.
 
 ## Admin
 - Kan tildele roller
+- Kan tildele Orgnisasjon 
 - Kan slette brukere
 - Har ikke tilgang til hindersystemet
 - Landingsside → **Admin/Users**
 
 ---
 
-# 5. Funksjonalitet
+# Funksjonalitet
 
 ## A) Registrering av hinder
 Brukeren tegner i kartet via Leaflet:
 - Punkt
 - Linje
-- Polygon
 
 GeoJSON lagres direkte i MariaDB.
 
 ## B) Metadata-utfylling
+- Opplasting av bilde (Valgfritt)
 - Kategori
 - Høyde (meter eller fot)
 - Beskrivelse
@@ -138,10 +94,11 @@ Approver → alle
 
 Filtrering på:
 - ID
-- Navn
+- Kategori
 - Høydeintervall
 - Status
 - Dato
+- Organisasjon
 
 ## D) Godkjenning / Avvisning
 Approver kan:
@@ -173,7 +130,7 @@ Approver kan:
 
 ---
 
-# 7. WMS / Permalenker / Kartlag (Avansert)
+# WMS / Permalenker / Kartlag (Avansert)
 
 Dette er gjort klart i arkitekturen og kan bygges ut videre.
 
@@ -188,109 +145,23 @@ Dette er gjort klart i arkitekturen og kan bygges ut videre.
 - Kartposisjon og zoom kan deles som URL-parametere.
 - Geometri kan inkluderes i URL eller hentes fra DB.
 
-## GeoJSON
+## GeoJSON 
 - All geometri lagres som standard GeoJSON.
 - Enkelt å eksportere til GIS-verktøy.
 
 ---
 
-# 8. Organisasjoner (Avansert krav)
+Dokumentasjon
+- [Systemarkitektur](docs/Systemarkitektur.md)
+- [Mobiltilpasning](docs/Mobiltilpasning.md)
+- [Testing og testresultater](docs/Testing.md)
 
-Systemet støtter organisasjoner gjennom:
-- `organization_id` i obstacles-tabellen
-- Kan utvides så Approver kun ser hindere fra egen organisasjon
-- Identity kan utvides med organisasjonsfelt
 
----
-
-# 9. Sikkerhetstiltak
-
-✔ ASP.NET Identity – sikrede passord  
-✔ Rollebasert tilgang – `[Authorize(Roles="...")]`  
-✔ Anti-forfalskningsbeskyttelse via `@Html.AntiForgeryToken()`  
-✔ Server-side validering  
-✔ Klientvalidering via jQuery Validate  
-✔ Ingen SQL-injeksjon (parameteriserte spørringer via Dapper)  
-✔ Pilot/Crew isoleres til egne hindere  
-✔ Admin kan ikke utføre hindermelding  
-✔ Passord lagres som salted hash  
-
----
-
-# 10. Testing
-
-## A) Enhetstesting (manuelle)
-- Konvertering ft → meter
-- Dato-normalisering til UTC
-- Roller → riktig redirect etter login
-- Pilot får ikke tilgang til Approver/Admin-sider
-
-## B) Systemtesting
-- Registrere hinder
-- Redigere / slette hinder
-- Filterfunksjoner
-- Godkjenning / avvisning
-- Endre rolle
-- Opprette ny bruker
-
-## C) Sikkerhetstesting
-- SQL-injeksjon: blokkeres av Dapper-parametere  
-- XSS-forsøk i felt  
-- CSRF: tester POST uten token → avvist  
-- Forsøk på tilgang til /Admin → avvist for ikke-admin  
-
-## D) Brukervennlighet
-- Testet på mobil via Chrome DevTools  
-- Kart fungerer med touch  
-- Større knapper etter brukertesting  
-
----
-
-# 11. Dokumentasjonsstruktur
-
-Repo inneholder:
-- `README.md` (denne filen)
-- `docker-compose.yml`
-- MVC-projektstruktur
-- Kommentarer i kontrollerne
-- Databasediagram i markdown
-
----
-
-# 12. Videre arbeid
-
-Forslag til neste steg:
-- Integrasjon mot Kartverket WMS
-- Eksponering av eget API
-- Dashboard / bedre rapportfunksjon
-- Push-varsler ved endret status
-- GIS-export av hendelser
-- Multi-organisasjonsfiltrering
-
----
-
-# Oppsummering
-Systemet oppfyller:
-
-✔ Docker-miljø  
-✔ MariaDB-tilkobling  
-✔ Identitet og registrering  
-✔ Autentisering / Autorisering  
-✔ Datastruktur for hinder  
-✔ Karttegning (punkt/linje/område)  
-✔ Pilot og Approver-rolle  
-✔ Mobiltilpasset frontend  
-✔ Sikkerhetstiltak  
-✔ Testing  
-✔ Full dokumentasjon  
-
-### Start systemet:
-```
-docker compose up --build
-```
-
-### Admin-innlogging:
-```
-admin@nrl.local
-Admin!123!
-```
+👥 Team
+Dette prosjektet ble utviklet av Gruppe 15:
+- Amgad
+- Yousef
+- Storm
+- Joachim
+- Filip
+- Marius
