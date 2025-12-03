@@ -155,7 +155,7 @@ Dette er gjort klart i arkitekturen og kan bygges ut videre.
 
 - [Systemarkitektur](docs/Systemarkitektur.md)
 - [Mobiltilpasning](docs/Mobiltilpasning.md)
-- [Testing og testresultater](docs/Testing.md)
+- [Testing](docs/Testing.md)
 
 
 
