@@ -74,7 +74,7 @@ Brukes for å gi roller til nye brukere.
 
 # Funksjonalitet
 
-## A) Registrering av hinder
+## Registrering av hinder
 Brukeren tegner i kartet via Leaflet:
 - Punkt
 - Linje
@@ -109,7 +109,7 @@ Approver kan:
 
 ---
 
-# 6. Datamodell (MariaDB)
+# Datamodell (MariaDB)
 
 ### Tabell: `obstacles`
 
