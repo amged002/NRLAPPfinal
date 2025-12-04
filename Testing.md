@@ -1,54 +1,168 @@
-# 🔎 Testing og testresultater
+# Testdokumentasjon
 
-Dette dokumentet beskriver manuelle tester utført på NRLApp.
+## Testplan
 
----
+### Mål
+Verifisere funksjonell flyt for:
+- Innlogging
+- Registrering av hinder med bilde
+- Saksbehandling (godkjenning/avslag)
+- Kartvisning av godkjente/ventende hinder
+- Rollebasert tilgangskontroll
+- Sikkerhetsmekanismer (rate limiting, CSRF, filvalidering)
 
-# ✔ Funksjonell testing
+### Testmiljø
+- Kjøring via **Visual Studio + Docker Compose** (ASP.NET Core 9 + MariaDB).
+- Dapper + parameteriserte SQL-queries.
+- Browser: Edge/Chrome.
+- Kultur: `nb-NO`.
 
-## Pilot
-- Registrering av hinder → vises i liste som "Avventer"
-- Utkast → lagres og kan fullføres senere
+### Roller testet
+- **Pilot**
+- **Approver**
+- **Admin**
 
-## Approver/Admin
-- Godkjenning/avvisning oppdaterer status og kommentar
-- Liste filtrerer på status, dato, organisasjon, høyde, kategori
-
----
-
-# ✔ Sikkerhetstesting
-
-## IDOR
-Pilot2 forsøker å åpne Pilot1 sine hindre:  
-→ *tilgang nektet (404/Forbid)*
-
-## Rollebeskyttelse
-Pilot prøver å åpne Admin/Approve-endepunkter:  
-→ *nektes tilgang*
-
-## CSRF
-POST uten anti-forgery token:  
-→ *avvist (400)*
-
-## Innlogging
-Feil passord flere ganger:  
-→ *lockout aktivert*
-
-## Filopplasting
-Feil filformat:  
-→ *avvist med norsk valideringsfeil*  
-Slettet hinder:  
-→ *tilhørende bildefil slettes*
+### Testdata
+- Seedet admin-bruker.
+- Manuelt opprettede Pilot- og Approver-brukere.
+- Flere hinder med og uten bilde.
 
 ---
 
-# 🧪 Testlogg (kort)
+## Testscenarier
 
-Dato | Scenario | Rolle | Resultat
------|----------|-------|---------
-2025-01 | Registrering av hinder | Pilot | OK
-2025-01 | Godkjenning/avvisning | Approver | OK
-2025-01 | Listefiltrering | Alle | OK
-2025-01 | IDOR/URL-manipulasjon | Pilot | OK
-2025-01 | CSRF-testing | System | OK
-2025-01 | Lockout ved feil passord | Pilot | OK
+### Pilot registrerer hinder (inkl. bilde)
+1. Pilot logger inn.
+2. Fyller ut hinderdata → velger bilde → sender inn.
+3. Systemet lagrer:
+   - GeoJSON
+   - Metadata
+   - Bilde i `/wwwroot/uploads`
+   - Status = *Pending*
+4. Kvitteringsside vises.
+
+**Forventet resultat:** Hinder lagret i DB, bilde ligger lagret, vis/skjul-knapp fungerer på detaljsiden.
+
+---
+
+### Approver / Admin oppdaterer status
+1. Bruker med rolle *Approver* eller *Admin* åpner detaljer.
+2. Legger inn kommentar og velger **Godkjenn** eller **Avvis**.
+3. POST er beskyttet med:
+   - `[Authorize(Roles="Admin,Approver")]`
+   - `[ValidateAntiForgeryToken]`
+4. Status og kommentar lagres i databasen.
+
+**Forventet resultat:** Status endres korrekt og vises på kart/oversikt.
+
+---
+
+### Pilot ser hinder på kart
+1. Pilot åpner kartvisningen.
+2. API-et returnerer *Approved + Pending* hinder i GeoJSON.
+3. Leaflet viser punkter med korrekt høyde, plassering og ikon.
+
+**Forventet resultat:** Kartet viser alle relevante hinder.
+
+---
+
+### Server-side validering
+Testet:
+- Manglende høyde
+- Negativ høyde
+- Ugyldige bildeformater
+- For store filer
+- Feil enhetsvalg
+
+**Forventet resultat:** Feilmeldinger vises, ingenting lagres.
+
+---
+
+### Rollebeskyttede ruter
+Forsøk utført av Pilot:
+
+| Rute forsøkt | Forventet | Resultat |
+|--------------|-----------|----------|
+| `/Obstacle/Delete/ID` | Forbudt | Avvist |
+| `/Obstacle/Approve/ID` | Forbudt | Avvist |
+| `/Admin/*` | Forbudt | Avvist |
+
+**Forventet resultat:** 403 eller redirect → oppfylt.
+
+---
+
+### Sikkerhetsbelastning – rate limiting
+Kjørt 15 raske forespørsler mot `/Obstacle/Meta`.
+
+**Forventet resultat:**  
+- Første 10 = OK  
+- 11–15 = blokkert av rate limiter  
+
+**Resultat:** Bestått.
+
+---
+
+### CSRF-beskyttelse
+- POST uten token → Avvist
+- Manipulert token → Avvist
+
+**Resultat:** Bestått.
+
+---
+
+### Bildehåndtering
+Testet:
+- Last opp bilde → Bekreftet lagret
+- Se bilde → vis/skjul fungerer
+- Slette hinder → bildefilen slettes automatisk
+
+**Resultat:** Bestått.
+
+---
+
+### URL-manipulasjon / direkte ID-tilgang
+- Pilot forsøker å endre hinder som tilhører andre
+- Pilot prøver å redigere slettet hinder
+- Approver prøver å slette noe uten tilgang
+
+**Forventet resultat:** Redirect til liste eller 403.  
+**Resultat:** Bestått.
+
+---
+
+### Unit-testing (egen testmappe)
+Prosjektet inneholder en mappe for **unit-tester**, blant annet:
+
+- Validering av høydekonvertering
+- Parsing/lagring av GeoJSON
+- Test av vis/skjul-bilde-logikk
+- Kontroll av at feil ID returnerer null/404
+
+**Resultat:** Alle enhetstester passerte.
+
+---
+
+## 📊 Testlogg og resultater
+
+| Dato | Scenario | Rolle | Resultat |
+|------|----------|-------|----------|
+| 01/12/2025 | Pilot registrerer hinder med bilde | Pilot | OK |
+| 01/12/2025 | Bilde vises + vis/skjul fungerer | Pilot | OK |
+| 01/12/2025 | Approver godkjenner hinder | Approver | OK |
+| 01/12/2025 | Avvis hinder med kommentar | Approver | OK |
+| 01/12/2025 | Pilot ser Approved + Pending i kart | Pilot | OK |
+| 01/12/2025 | Ugyldig skjema gir valideringsfeil | Pilot | OK |
+| 01/12/2025 | Pilot prøver Approver-endepunkt | Pilot | Avvist |
+| 01/12/2025 | Rate limiting etter 10 forespørsler | Pilot | OK |
+| 01/12/2025 | POST uten CSRF-token | Pilot | Avvist |
+| 02/12/2025 | Bilde slettes når hinder slettes | Admin | OK |
+| 02/12/2025 | URL-manipulasjon for å endre andres hinder | Pilot | Avvist |
+| 02/12/2025 | Unit-test: GeoJSON parsing | System | OK |
+
+---
+
+## ✔ Oppsummering
+
+Alle funksjonelle og sikkerhetsrelaterte testscenarier ble gjennomført og bestått.  
+Systemet er stabilt, rollebasert tilgang kontrolleres korrekt, og sikkerhetsmekanismer fungerer som forventet.
+
