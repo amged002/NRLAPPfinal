@@ -1,11 +1,27 @@
-# Mobiltilpasning
+# 📱 Mobil- og nettbrett-tilpasning
 
-Denne siden beskriver hvordan appen/GUI tilpasses mobil:
+NRLApp er testet for skjermbredder **768–1280 px**.
 
-Innholdsforslag:
-- Responsivt design (CSS, media queries)
-- Skjermstørrelser og brytpunkt
-- Teststrategi på telefoner og emulatorer
-- Eventuelle progressive web app-innstillinger eller native wrappers
+---
 
-(Erstatt dette med detaljert dokumentasjon.)
+## Oppførsel på nettbrett
+
+- Skjema brytes til én kolonne på små skjermer
+- Kart skalerer automatisk
+- Tabeller får horisontal scrolling under ~850 px
+- Store klikkeflater for berøring
+
+---
+
+## Designprinsipper
+
+- Mobile-first CSS
+- Fleksible layout-containere
+- Leaflet beholder kontroller innenfor viewport
+
+---
+
+## Videre forbedringer
+
+- Optimalisere kartzoom for tablet
+- Forhåndsvisning av bilder i et modalt vindu
