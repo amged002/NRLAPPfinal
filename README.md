@@ -74,7 +74,7 @@ Brukes for å gi roller til nye brukere.
 
 # Funksjonalitet
 
-## Registrering av hinder
+## A) Registrering av hinder
 Brukeren tegner i kartet via Leaflet:
 - Punkt
 - Linje
@@ -156,7 +156,7 @@ Dette er gjort klart i arkitekturen og kan bygges ut videre.
 - [Mobiltilpasning](./Mobiltilpasning.md)
 - [Testing](./Testing.md)
 
-👥 Team
+Team
 Dette prosjektet ble utviklet av Gruppe 15:
 - Amgad
 - Yousef
