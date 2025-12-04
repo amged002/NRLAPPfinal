@@ -1,4 +1,4 @@
-# 🗺️ NRLApp – IS-200 Programmeringsprosjekt (Høst 2025)
+# NRLApp – IS-200 Programmeringsprosjekt (Høst 2025)
 
 NRLApp er en ASP.NET Core 9 MVC-applikasjon som lar piloter registrere luftfartshindre via karttegning og skjema, og gjør det mulig for Approvere og Admin å behandle og godkjenne innsendelser.  
 Løsningen kjører i Visual Studio gjennom Docker Compose, som starter både webapplikasjonen og MariaDB-databasen.
