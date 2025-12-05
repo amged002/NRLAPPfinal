@@ -2,7 +2,7 @@
 # NRLAPP .gitignore
 #############################
 
-# Runtime uploads (ALDRI legg på GitHub)
+
 wwwroot/uploads/
 
 # Build output

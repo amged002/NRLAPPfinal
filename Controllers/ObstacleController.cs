@@ -71,7 +71,7 @@ namespace NRLApp.Controllers
             // Lagre valgt geometri i TempData
             SaveDrawState(new DrawState { GeoJson = geoJson });
 
-            // Gå videre til metadata-skjema
+            
             return RedirectToAction(nameof(Meta));
         }
 
