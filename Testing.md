@@ -12,13 +12,6 @@ Denne guiden beskriver hvordan du kjører og vedlikeholder testene for NRL Hinde
 | Enhetstester (xUnit) | `NRLApp.Tests` | Validator- og kontrolllogikk (bl.a. `ObstacleMetaValidator`, `AccountController`, `HomeController`, `ContactController`) samt viewmodell-oppførsel (`ErrorViewModel`). |
 | Manuell funksjonell verifikasjon | Produksjons- og QA-miljøer | Registrering av hinder, roller og tilgangsstyring som beskrevet i README. |
 
-## Prosjektstruktur
-- `NRLApp.Tests/NRLApp.Tests.csproj` – testprosjekt (.NET 9).
-- `NRLApp.Tests/Controllers/AccountControllerTests.cs` – pålogging, registrering og utlogging.
-- `NRLApp.Tests/Controllers/SimpleControllersTests.cs` – `HomeController` og `ContactController` returnerer forventede views.
-- `NRLApp.Tests/Models/ErrorViewModelTests.cs` – `ShowRequestId`-logikk.
-- `NRLApp.Tests/Models/Obstacles/ObstacleMetaValidatorTests.cs` – validering av hinder-metadata og høydekonvertering.
-
 ## Kjøre tester
 Kjør kommandoene fra repo-roten.
 
