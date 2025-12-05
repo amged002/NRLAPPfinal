@@ -4,32 +4,29 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using NRLApp.Data;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authentication.Cookies;
-// Legg til denne:
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // === DATABASE (MySQL/MariaDB via Pomelo) ===
+// Henter connection string fra appsettings.*.json
 var cs = builder.Configuration.GetConnectionString("DefaultConnection");
 Console.WriteLine($"[DEBUG-CONN] {cs}");
 
-
-// VIKTIG: Ikke bruk AutoDetect (krever live-DB); spesifiser MariaDB-versjon uten å koble til.
+// Definerer hvilken MariaDB-versjon EF skal bruke uten å prøve å koble til databasen.
 var serverVersion = ServerVersion.Create(new Version(11, 0, 0), ServerType.MariaDb);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseMySql(cs, serverVersion, mySqlOptions =>
     {
-        // Litt robusthet på transient feil
+        // Forsøker automatisk på nytt ved midlertidige DB-feil
         mySqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
     });
 });
 
-// === IDENTITY (enkle krav i dev) ===
 // === IDENTITY (styrket sikkerhet) ===
+// Konfigurerer Identity-systemet med litt strengere passordregler og lockout.
 builder.Services
     .AddIdentity<IdentityUser, IdentityRole>(opt =>
     {
@@ -40,7 +37,7 @@ builder.Services
         opt.Password.RequireUppercase = true;
         opt.Password.RequireLowercase = true;
 
-        // Lockout-innstillinger
+        // Lockout-innstillinger (beskytter mot brute force på login)
         opt.Lockout.MaxFailedAccessAttempts = 5;                       // etter 5 feil
         opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10); // låses i 10 min
         opt.Lockout.AllowedForNewUsers = true;
@@ -48,14 +45,14 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
+// Konfigurerer autentiseringscookie for innlogging
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     opt.LoginPath = "/Account/Login";
     opt.AccessDeniedPath = "/Account/AccessDenied";
     opt.SlidingExpiration = true;
 
-    // SIKKERHET:
+    // SIKKERHET: strammer inn hvordan cookie håndteres
     opt.Cookie.Name = "NRLApp.Auth";                     // unikt navn
     opt.Cookie.HttpOnly = true;                          // ikke lesbar fra JS
     opt.Cookie.SameSite = SameSiteMode.Lax;              // beskytter mot CSRF for de fleste scenarier
@@ -64,6 +61,7 @@ builder.Services.ConfigureApplicationCookie(opt =>
 });
 
 // === PORT-OPPSETT SOM FUNKER BÅDE LOKALT OG I DOCKER ===
+// I container styres port via miljøvariabler; lokalt setter vi eksplisitt til 5099.
 var runningInContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
 if (!runningInContainer && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
 {
@@ -71,6 +69,7 @@ if (!runningInContainer && string.IsNullOrEmpty(Environment.GetEnvironmentVariab
 }
 
 // === LOGGING (enkel, tydelig i konsoll) ===
+// Fjerner standard loggere og bruker en enkel konsoll-logger i stedet.
 builder.Logging.ClearProviders();
 builder.Logging.AddSimpleConsole(o =>
 {
@@ -84,13 +83,14 @@ builder.Services.AddSession(o =>
 {
     o.IdleTimeout = TimeSpan.FromHours(4);
 
-    // SIKKERHET:
+    // SIKKERHET: session-cookie bør ikke være tilgjengelig fra JS
     o.Cookie.HttpOnly = true;
     o.Cookie.SameSite = SameSiteMode.Lax;
     o.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
-// (valgfritt) språk
+
+// Setter standard kultur/globalisering til en-US for hele appen.
 var defaultCulture = new CultureInfo("en-US");
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
@@ -103,12 +103,14 @@ CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 var app = builder.Build();
 
+// Feilhåndtering avhenger av om vi kjører i Development eller ikke.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
+// Aktiverer språkstøtten vi satte opp over
 app.UseRequestLocalization(app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
@@ -116,25 +118,29 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 
-// Viktig rekkefølge
+// Viktig rekkefølge for autentisering/autorisasjon
 app.UseAuthentication();
 app.UseAuthorization();
 
-// --- Ruter ---
+// Ruter
+// Root-URL sender bare videre til login-siden.
 app.MapGet("/", () => Results.Redirect("/Account/Login"));
 
+// Standard MVC-rute
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
 
+// Egen rute for hinder controller
 app.MapControllerRoute(
     name: "obstacles",
     pattern: "obstacle/{action=Area}/{id?}",
     defaults: new { controller = "Obstacle" }
 );
 
-// === VENT PÅ DB -> MIGRER -> SEED ADMIN ===
+// VENT PÅ DB -> MIGRER -> SEED ADMIN ===
+// Når appen starter opp, sørger vi for at databasen finnes, er migrert og har en admin-bruker.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -143,7 +149,7 @@ using (var scope = app.Services.CreateScope())
 
     // 1) Vent (med retry) til DB svarer
     var connected = false;
-    for (int attempt = 1; attempt <= 90; attempt++) // inntil ~90 sek
+    for (int attempt = 1; attempt <= 90; attempt++) // inntil 90 sek
     {
         try
         {
@@ -168,7 +174,7 @@ using (var scope = app.Services.CreateScope())
         throw new Exception("Database not reachable in time.");
     }
 
-    // 2) Migrer
+    // Migrer
     await db.Database.MigrateAsync();
 
     // 3) Seed admin hvis tomt
@@ -182,12 +188,14 @@ using (var scope = app.Services.CreateScope())
     const string pilotRole = "Pilot";
     const string crewRole = "Crew";
 
+    // Sørger for at alle roller finnes
     foreach (var roleName in new[] { adminRole, approverRole, pilotRole, crewRole })
     {
         if (!await roleManager.RoleExistsAsync(roleName))
             await roleManager.CreateAsync(new IdentityRole(roleName));
     }
 
+    // Hvis det ikke finnes noen brukere enda, lager vi en admin-konto.
     if (!userManager.Users.Any())
     {
         var admin = new IdentityUser
@@ -209,6 +217,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// Logger en melding når appen er oppe og kjører
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     var urls = app.Urls.Any() ? string.Join(", ", app.Urls) : "http://localhost:5099";

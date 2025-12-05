@@ -1,16 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using NRLApp.Models;
 using NRLApp.Models.Obstacles;
-using System.IO;
-using System.Linq;
-using System.IO;
 
 namespace NRLApp.Controllers
 {
