@@ -5,8 +5,6 @@ C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\xunit.abstractio
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\NRLApp.deps.json
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\NRLApp.runtimeconfig.json
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\appsettings.json
-C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\NRLApp.Tests\obj\NRLApp.Tests.csproj.nuget.dgspec.json
-C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\NRLApp.Tests\obj\project.assets.json
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\NRLApp.staticwebassets.runtime.json
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\NRLApp.staticwebassets.endpoints.json
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\bin\Debug\net9.0\NRLApp.exe
@@ -128,3 +126,4 @@ C:\Users\storm\source\repos\FINAL\NRLApp.Tests\obj\Debug\net9.0\refint\NRLApp.Te
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\obj\Debug\net9.0\NRLApp.Tests.pdb
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\obj\Debug\net9.0\NRLApp.Tests.genruntimeconfig.cache
 C:\Users\storm\source\repos\FINAL\NRLApp.Tests\obj\Debug\net9.0\ref\NRLApp.Tests.dll
+C:\Users\storm\source\repos\FINAL\NRLApp.Tests\obj\Debug\net9.0\NRLApp.Tests.sourcelink.json
