@@ -21,6 +21,7 @@ namespace NRLApp.Controllers
     public class ObstacleController : Controller
     {
         private readonly IConfiguration _config;
+        private readonly ObstacleMetaValidator _obstacleMetaValidator = new();
         public ObstacleController(IConfiguration config) => _config = config;
 
         // Oppretter MYSQL-tilkobling
@@ -100,14 +101,11 @@ namespace NRLApp.Controllers
             var geoJsonToSave = string.IsNullOrWhiteSpace(s.GeoJson) ? "{}" : s.GeoJson;
 
             // Validering
-            if (string.IsNullOrWhiteSpace(vm.ObstacleName) && string.IsNullOrWhiteSpace(vm.Category))
-            {
-                ModelState.AddModelError(nameof(vm.ObstacleName), "Skriv hva det er, eller velg en kategori.");
-            }
+            var validationResult = _obstacleMetaValidator.Validate(vm);
 
-            if (vm.HeightValue is null || vm.HeightValue < 0)
+            foreach (var error in validationResult.Errors)
             {
-                ModelState.AddModelError(nameof(vm.HeightValue), "Oppgi høyde.");
+                ModelState.AddModelError(error.FieldName, error.Message);
             }
 
             if (!ModelState.IsValid)
@@ -116,25 +114,15 @@ namespace NRLApp.Controllers
             }
 
             // Konverter høyde til meter
-            double heightMeters = vm.HeightValue!.Value;
-            if (string.Equals(vm.HeightUnit, "ft", StringComparison.OrdinalIgnoreCase))
-            {
-                heightMeters = Math.Round(heightMeters * 0.3048, 0);
-            }
+            double heightMeters = validationResult.HeightMeters ?? vm.HeightValue!.Value;
 
             bool isDraft = string.Equals(action, "draft", StringComparison.OrdinalIgnoreCase) || vm.SaveAsDraft;
-
-            if (heightMeters > 300)
-            {
-                ModelState.AddModelError(nameof(vm.HeightValue), "Høyden kan ikke overstige 300 meter.");
-                return View(vm);
-            }
 
             // Hent bruker-ID
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // ============================
-            // FILOPPLASTING (valgfritt)
+            // FILOPPLASTING
             // ============================
             string? imagePath = null;
 
@@ -267,7 +255,7 @@ VALUES (
                 parameters.Add("Id", filter.Id.Value);
             }
 
-            // NYTT: filtrer på kategori (obstacle_category)
+            // Filtrer på kategori (obstacle_category)
             if (!string.IsNullOrWhiteSpace(filter.Category))
             {
                 where.Add("LOWER(o.obstacle_category) LIKE @Category");
@@ -356,7 +344,7 @@ ORDER BY o.id DESC;";
 
             var rows = await con.QueryAsync<ObstacleListItem>(sql, parameters);
 
-            // NYTT: hent organisasjoner til nedtrekksliste
+            // Hent organisasjoner til nedtrekksliste
             var orgs = await con.QueryAsync<OrganizationVm>(@"
         SELECT id AS Id, name AS Name
         FROM organizations

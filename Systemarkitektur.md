@@ -1,4 +1,4 @@
-# 🧩 Systemarkitektur
+# Systemarkitektur
 
 NRLApp består av to hovedkomponenter:
 
