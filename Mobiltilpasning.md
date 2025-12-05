@@ -1,4 +1,4 @@
-# 📱 Mobil- og nettbrett-tilpasning
+# Mobil- og nettbrett-tilpasning
 
 NRLApp er testet for skjermbredder **768–1280 px**.
 
