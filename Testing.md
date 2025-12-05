@@ -183,7 +183,8 @@ Prosjektet inneholder en mappe for **unit-tester**, blant annet:
 - Test av vis/skjul-bilde-logikk
 - Kontroll av at feil ID returnerer null/404
 
-**Resultat:** Alle enhetstester passerte.
+**Resultat:** Alle enhetstester passerte, men er ikke med i Github Repository fordi den er i en egen csproj.
+
 <img width="615" height="1019" alt="image" src="https://github.com/user-attachments/assets/ea71d09b-3f64-43e7-bcdd-541fb75fd555" />
 
 
