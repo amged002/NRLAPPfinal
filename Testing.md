@@ -47,14 +47,6 @@ dotnet test NRLApp.Tests/NRLApp.Tests.csproj --filter ObstacleMetaValidator
 - **Feil referanser**: Kjør `dotnet restore` i rotmappen hvis NuGet-pakker mangler.
 - **Uventet testoppførsel**: Sørg for at miljøvariabler og appsettings for lokale miljøer ikke påvirker controller-logikken når du kjører testene.
 
-## Videre arbeid
-- Legg til integrasjonstester med en in-memory webserver (`WebApplicationFactory`) for å dekke routing, modellbinding og autentisering.
-- Utvid modell- og valideringstestene etter hvert som nye felter legges til hinder, kontoer eller andre domenemodeller.
-- Kjør testene automatisk i CI (GitHub Actions/Azure DevOps) med `dotnet test` for å fange regresjoner tidlig.
-# Testdokumentasjon
-
-## Testplan
-
 ### Mål
 Verifisere funksjonell flyt for:
 - Innlogging
@@ -192,6 +184,8 @@ Prosjektet inneholder en mappe for **unit-tester**, blant annet:
 - Kontroll av at feil ID returnerer null/404
 
 **Resultat:** Alle enhetstester passerte.
+<img width="615" height="1019" alt="image" src="https://github.com/user-attachments/assets/ea71d09b-3f64-43e7-bcdd-541fb75fd555" />
+
 
 ---
 
