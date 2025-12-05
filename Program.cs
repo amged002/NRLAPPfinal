@@ -118,7 +118,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 
-// Viktig rekkefølge for autentisering/autorisasjon
+// Viktig rekkefølge
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+/// Viewmodel for login validation
+
 namespace NRLApp.Models.Account
 {
     public class LoginViewModel
