@@ -12,13 +12,6 @@ Denne guiden beskriver hvordan du kjører og vedlikeholder testene for NRL Hinde
 | Enhetstester (xUnit) | `NRLApp.Tests` | Validator- og kontrolllogikk (bl.a. `ObstacleMetaValidator`, `AccountController`, `HomeController`, `ContactController`) samt viewmodell-oppførsel (`ErrorViewModel`). |
 | Manuell funksjonell verifikasjon | Produksjons- og QA-miljøer | Registrering av hinder, roller og tilgangsstyring som beskrevet i README. |
 
-## Prosjektstruktur
-- `NRLApp.Tests/NRLApp.Tests.csproj` – testprosjekt (.NET 9).
-- `NRLApp.Tests/Controllers/AccountControllerTests.cs` – pålogging, registrering og utlogging.
-- `NRLApp.Tests/Controllers/SimpleControllersTests.cs` – `HomeController` og `ContactController` returnerer forventede views.
-- `NRLApp.Tests/Models/ErrorViewModelTests.cs` – `ShowRequestId`-logikk.
-- `NRLApp.Tests/Models/Obstacles/ObstacleMetaValidatorTests.cs` – validering av hinder-metadata og høydekonvertering.
-
 ## Kjøre tester
 Kjør kommandoene fra repo-roten.
 
@@ -46,14 +39,6 @@ dotnet test NRLApp.Tests/NRLApp.Tests.csproj --filter ObstacleMetaValidator
 - **SDK mangler**: Installer .NET 9.0 SDK fra Microsofts nedlastinger og verifiser med `dotnet --version` før du kjører testene.
 - **Feil referanser**: Kjør `dotnet restore` i rotmappen hvis NuGet-pakker mangler.
 - **Uventet testoppførsel**: Sørg for at miljøvariabler og appsettings for lokale miljøer ikke påvirker controller-logikken når du kjører testene.
-
-## Videre arbeid
-- Legg til integrasjonstester med en in-memory webserver (`WebApplicationFactory`) for å dekke routing, modellbinding og autentisering.
-- Utvid modell- og valideringstestene etter hvert som nye felter legges til hinder, kontoer eller andre domenemodeller.
-- Kjør testene automatisk i CI (GitHub Actions/Azure DevOps) med `dotnet test` for å fange regresjoner tidlig.
-# Testdokumentasjon
-
-## Testplan
 
 ### Mål
 Verifisere funksjonell flyt for:
@@ -191,7 +176,11 @@ Prosjektet inneholder en mappe for **unit-tester**, blant annet:
 - Test av vis/skjul-bilde-logikk
 - Kontroll av at feil ID returnerer null/404
 
-**Resultat:** Alle enhetstester passerte.
+**Resultat:** Alle enhetstester passerte. NRLAPP.Tests er ikke med i Github Repository fordi den er i en egen csproj på grunn av namespace problemer i main mappen. 
+
+<img width="615" height="1019" alt="image" src="https://github.com/user-attachments/assets/ea71d09b-3f64-43e7-bcdd-541fb75fd555" /> <img width="1208" height="289" alt="image" src="https://github.com/user-attachments/assets/cab45e23-8797-4f85-8dd7-72b1873c30a5" />
+
+
 
 ---
 
